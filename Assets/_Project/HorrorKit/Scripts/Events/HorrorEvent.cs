@@ -151,8 +151,17 @@ namespace HorrorKit
                 }
                 Gizmos.matrix = Matrix4x4.identity;
             }
+            // ラベルは Collider 全体の上に出す（親が原点にあり子に形状がある場合でも正しい位置になる）
+            Vector3 labelPos = transform.position + Vector3.up * 0.3f;
+            var colliders = GetComponentsInChildren<Collider>(true);
+            if (colliders.Length > 0)
+            {
+                var bounds = colliders[0].bounds;
+                foreach (var c in colliders) bounds.Encapsulate(c.bounds);
+                labelPos = bounds.center + Vector3.up * (bounds.extents.y + 0.15f);
+            }
             var style = new GUIStyle(UnityEditor.EditorStyles.miniBoldLabel) { normal = { textColor = Gizmos.color } };
-            UnityEditor.Handles.Label(transform.position + Vector3.up * 0.3f, "◆ " + DisplayName, style);
+            UnityEditor.Handles.Label(labelPos, "◆ " + DisplayName, style);
         }
 #endif
     }

@@ -1,5 +1,8 @@
 # HorrorKit
 
+> 初めての人は **Docs/HorrorKit_ギミック制作ガイド.pdf**（画像付きの入門書）から読んでください。
+> クラス・関数の詳細は Docs/HorrorKit_解説書.md。PDF の元データ（HTML・画像）は Docs/Manual~/ にあります。
+
 一人称ホラー用の基本セット。Unity 6 / URP / Input System / Cinemachine 3。
 
 ## メニュー

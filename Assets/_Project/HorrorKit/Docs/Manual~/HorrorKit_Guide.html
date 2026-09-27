@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>HorrorKit ギミック制作ガイド</title>
+<style>
+  :root {
+    --ink: #1f2328;
+    --sub: #57606a;
+    --line: #d0d7de;
+    --bg-soft: #f6f8fa;
+    --accent: #8b1e1e;
+    --accent-soft: #fbeaea;
+    --tip: #1a7f37;
+    --tip-soft: #e9f7ee;
+    --warn: #9a6700;
+    --warn-soft: #fff8e1;
+    --blue: #0969da;
+    --blue-soft: #eaf2fd;
+  }
+  @page {
+    size: A4;
+    margin: 16mm 15mm 18mm 15mm;
+    @bottom-center { content: counter(page) " / " counter(pages); font-size: 9pt; color: #8c959f; }
+    @bottom-left { content: "HorrorKit ギミック制作ガイド"; font-size: 8pt; color: #afb8c1; }
+  }
+  @page :first { @bottom-center { content: none; } @bottom-left { content: none; } }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    font-family: "Yu Gothic UI", "Yu Gothic", "游ゴシック体", "Meiryo", sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.75;
+    color: var(--ink);
+    background: #fff;
+  }
+  main { max-width: 190mm; margin: 0 auto; }
+  h1, h2, h3, h4 { line-height: 1.35; font-weight: 700; }
+  h2.chapter {
+    break-before: page;
+    font-size: 20pt;
+    margin: 0 0 6mm;
+    padding: 0 0 3mm;
+    border-bottom: 3px solid var(--accent);
+  }
+  h2.chapter .no { color: var(--accent); margin-right: 3mm; }
+  h3 {
+    font-size: 14pt;
+    margin: 9mm 0 3mm;
+    padding: 1.5mm 0 1.5mm 3mm;
+    border-left: 5px solid var(--accent);
+    background: linear-gradient(90deg, var(--accent-soft), transparent 70%);
+    break-after: avoid;
+  }
+  h3.newpage { break-before: page; margin-top: 0; }
+  h4 { font-size: 11.5pt; margin: 5mm 0 2mm; color: var(--accent); break-after: avoid; }
+  p { margin: 0 0 3mm; }
+  ul, ol { margin: 0 0 3mm; padding-left: 6mm; }
+  li { margin: 0.6mm 0; }
+  code, kbd {
+    font-family: "Cascadia Mono", Consolas, "MS Gothic", monospace;
+    font-size: 9.2pt;
+  }
+  code { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 3px; padding: 0 1.2mm; }
+  kbd {
+    display: inline-block;
+    min-width: 5mm;
+    text-align: center;
+    padding: 0 1.4mm;
+    border: 1px solid #8c959f;
+    border-bottom-width: 2px;
+    border-radius: 3px;
+    background: #fff;
+    line-height: 1.5;
+  }
+  .menu { font-weight: 700; color: var(--blue); }
+  table { border-collapse: collapse; width: 100%; margin: 2mm 0 4mm; font-size: 9.6pt; break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: 1.4mm 2.2mm; vertical-align: top; text-align: left; }
+  th { background: var(--bg-soft); font-weight: 700; white-space: nowrap; }
+  figure { margin: 3mm 0 5mm; text-align: center; break-inside: avoid; }
+  figure img { max-width: 100%; border: 1px solid var(--line); border-radius: 4px; }
+  figure.w85 img { max-width: 85%; }
+  figure.w70 img { max-width: 70%; }
+  figure.w60 img { max-width: 60%; }
+  figure.w50 img { max-width: 50%; }
+  figcaption { font-size: 8.8pt; color: var(--sub); margin-top: 1.2mm; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; align-items: start; break-inside: avoid; }
+  .row figure { margin: 0 0 4mm; }
+  .row.r-60-40 { grid-template-columns: 1.4fr 1fr; }
+  .box {
+    border-radius: 5px;
+    padding: 2.5mm 4mm;
+    margin: 3mm 0 4mm;
+    break-inside: avoid;
+    font-size: 10pt;
+  }
+  .box > .label { font-weight: 700; display: block; margin-bottom: 1mm; }
+  .tip { background: var(--tip-soft); border-left: 4px solid var(--tip); }
+  .tip > .label { color: var(--tip); }
+  .warn { background: var(--warn-soft); border-left: 4px solid var(--warn); }
+  .warn > .label { color: var(--warn); }
+  .point { background: var(--blue-soft); border-left: 4px solid var(--blue); }
+  .point > .label { color: var(--blue); }
+  .box p:last-child, .box ul:last-child, .box ol:last-child { margin-bottom: 0; }
+
+  ol.steps { list-style: none; counter-reset: step; padding-left: 0; }
+  ol.steps > li {
+    counter-increment: step;
+    position: relative;
+    padding: 0 0 2.2mm 10mm;
+    margin: 0 0 1.5mm;
+  }
+  ol.steps > li::before {
+    content: counter(step);
+    position: absolute; left: 0; top: 0.3mm;
+    width: 6.5mm; height: 6.5mm; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-weight: 700; font-size: 9pt; line-height: 6.5mm; text-align: center;
+  }
+
+  /* 表紙 */
+  .cover {
+    height: 255mm;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 0 10mm;
+    background:
+      radial-gradient(ellipse at 70% 35%, rgba(255, 230, 190, 0.18), transparent 45%),
+      linear-gradient(160deg, #111318 0%, #1b1d24 55%, #2a1113 100%);
+    color: #e8e6e3;
+    border-radius: 6px;
+  }
+  .cover .kit { letter-spacing: 0.3em; color: #c9a36b; font-size: 11pt; margin-bottom: 4mm; }
+  .cover h1 { font-size: 30pt; margin: 0 0 4mm; color: #fff; }
+  .cover .lead { font-size: 12.5pt; color: #cfc9c2; margin-bottom: 14mm; }
+  .cover img { width: 100%; border-radius: 4px; border: 1px solid #3a3d45; }
+  .cover .meta { margin-top: 10mm; font-size: 9.5pt; color: #9aa0a6; line-height: 1.9; }
+
+  /* 目次 */
+  .toc { break-before: page; }
+  .toc h2 { font-size: 18pt; border-bottom: 3px solid var(--accent); padding-bottom: 2mm; margin-top: 0; }
+  .toc ol { list-style: none; padding: 0; }
+  .toc > ol > li { margin: 3mm 0 1mm; font-weight: 700; font-size: 11.5pt; }
+  .toc ol ol { padding-left: 7mm; margin: 1mm 0 0; }
+  .toc ol ol li { font-weight: 400; font-size: 10pt; margin: 0.6mm 0; }
+  .toc a { color: var(--ink); text-decoration: none; }
+
+  /* メニューの模式図 */
+  .menu-mock {
+    display: inline-block; text-align: left;
+    background: #f3f3f3; border: 1px solid #b7b7b7; border-radius: 4px;
+    box-shadow: 2px 3px 8px rgba(0,0,0,0.18);
+    font-size: 9.5pt; padding: 1mm 0; min-width: 62mm;
+  }
+  .menu-mock div { padding: 0.8mm 5mm; }
+  .menu-mock .sep { border-top: 1px solid #d6d6d6; margin: 1mm 0; padding: 0; }
+  .menu-mock .hl { background: #3b73d6; color: #fff; }
+  .menu-mock .sub { margin-left: 2mm; }
+  .menu-wrap { display: flex; gap: 2mm; align-items: flex-start; justify-content: center; margin: 3mm 0 2mm; }
+
+  /* ページ判定の図 */
+  .pages-flow { display: flex; gap: 2mm; align-items: stretch; justify-content: center; margin: 3mm 0 2mm; break-inside: avoid; }
+  .pages-flow .pg {
+    flex: 1; border: 1.5px solid var(--line); border-radius: 5px; padding: 2mm; font-size: 9pt; background: #fff; text-align: center;
+  }
+  .pages-flow .pg b { display: block; font-size: 10pt; margin-bottom: 1mm; }
+  .pages-flow .ng { background: #f6f8fa; color: #8c959f; }
+  .pages-flow .ok { border-color: var(--tip); background: var(--tip-soft); }
+  .pages-flow .arrow { align-self: center; color: var(--sub); font-size: 13pt; flex: 0 0 auto; }
+
+  .map-legend { columns: 2; column-gap: 8mm; font-size: 9.8pt; margin: 0 0 3mm; }
+  .map-legend li { break-inside: avoid; }
+  .num {
+    display: inline-block; width: 5.2mm; height: 5.2mm; border-radius: 50%;
+    background: var(--accent); color: #fff; font-size: 8pt; font-weight: 700;
+    text-align: center; line-height: 5.2mm; margin-right: 1.2mm;
+  }
+  .small { font-size: 9pt; color: var(--sub); }
+  .gimmick-head { display: flex; gap: 3mm; flex-wrap: wrap; margin: 0 0 3mm; }
+  .tag { font-size: 8.6pt; border-radius: 10px; padding: 0.2mm 2.6mm; background: var(--bg-soft); border: 1px solid var(--line); }
+  .tag.red { background: var(--accent-soft); border-color: #e5b3b3; color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+
+<!-- ============ 表紙 ============ -->
+<section class="cover">
+  <div class="kit">HORROR KIT</div>
+  <h1>ギミック制作ガイド</h1>
+  <div class="lead">サンプルを読み解いて、自分のホラーギミックを作れるようになるための入門書</div>
+  <img src="images/g_note_prompt.jpg" alt="">
+  <div class="meta">
+    対象：Unity 6（6000.6）/ URP / Input System / Cinemachine 3<br>
+    フォルダ：Assets/_Project/HorrorKit<br>
+    サンプルシーン：Assets/_Project/Scenes/HorrorDemo.unity<br>
+    2026年9月版
+  </div>
+</section>
+
+<!-- ============ 目次 ============ -->
+<section class="toc">
+  <h2>目次</h2>
+  <ol>
+    <li><a href="#ch0">第0章　はじめに</a>
+      <ol>
+        <li><a href="#s0-1">0-1　HorrorKit でできること</a></li>
+        <li><a href="#s0-2">0-2　まず覚える6つの言葉</a></li>
+        <li><a href="#s0-3">0-3　デモを遊んでみる</a></li>
+        <li><a href="#s0-4">0-4　デモシーンの地図</a></li>
+        <li><a href="#s0-5">0-5　イベントが動くしくみ（ページのルール）</a></li>
+      </ol>
+    </li>
+    <li><a href="#ch1">第1章　サンプルのギミックを読み解く</a>
+      <ol>
+        <li><a href="#s1-1">1-1　オープニング（自動実行）</a></li>
+        <li><a href="#s1-2">1-2　机のメモ（拾うアイテム）</a></li>
+        <li><a href="#s1-3">1-3　古いラジオ（フラグで会話が変わる）</a></li>
+        <li><a href="#s1-4">1-4　廊下の棚（条件付きで鍵が見つかる）</a></li>
+        <li><a href="#s1-5">1-5　廊下の幽霊（エリア＋ジャンプスケア）</a></li>
+        <li><a href="#s1-6">1-6　鍵のかかった扉</a></li>
+        <li><a href="#s1-7">1-7　デモ終了（暗転演出）</a></li>
+        <li><a href="#s1-8">1-8　雰囲気づくりの部品（照明・懐中電灯・プレイヤー）</a></li>
+      </ol>
+    </li>
+    <li><a href="#ch2">第2章　新しいギミックを作る</a>
+      <ol>
+        <li><a href="#s2-0">2-0　作業の流れと、新しいシーンの準備</a></li>
+        <li><a href="#s2-1">2-1　アイテムとフラグを登録する</a></li>
+        <li><a href="#s2-2">2-2　調べるだけのオブジェクト</a></li>
+        <li><a href="#s2-3">2-3　拾えるアイテム</a></li>
+        <li><a href="#s2-4">2-4　状況で反応が変わるもの（ページを増やす）</a></li>
+        <li><a href="#s2-5">2-5　エリアに入ると起きるイベント</a></li>
+        <li><a href="#s2-6">2-6　鍵付きの扉</a></li>
+        <li><a href="#s2-7">2-7　ジャンプスケア</a></li>
+        <li><a href="#s2-8">2-8　ちらつく照明</a></li>
+        <li><a href="#s2-9">2-9　自分の3Dモデルを使うときのコツ</a></li>
+      </ol>
+    </li>
+    <li><a href="#ch3">第3章　管理とテスト</a>
+      <ol>
+        <li><a href="#s3-1">3-1　マネージャーを開く</a></li>
+        <li><a href="#s3-2">3-2　イベントタブ（一覧と編集）</a></li>
+        <li><a href="#s3-3">3-3　会話テキストタブ（文章の一括編集）</a></li>
+        <li><a href="#s3-4">3-4　アイテム／フラグタブ（参照とID変更）</a></li>
+        <li><a href="#s3-5">3-5　デバッグタブ（再生中のテスト）</a></li>
+        <li><a href="#s3-6">3-6　コマンド・条件の一覧表</a></li>
+      </ol>
+    </li>
+    <li><a href="#ch4">第4章　困ったときは</a></li>
+  </ol>
+</section>
+
+<!-- ============ 第0章 ============ -->
+<h2 class="chapter" id="ch0"><span class="no">第0章</span>はじめに</h2>
+
+<h3 id="s0-1">0-1　HorrorKit でできること</h3>
+<p>HorrorKit は、一人称ホラーゲームでよく使う仕掛け（ギミック）を、<b>プログラムを書かずに</b>Unity のインスペクター上で組み立てるためのセットです。</p>
+<ul>
+  <li><b>調べる</b>：机・メモ・ラジオなどを <kbd>E</kbd> キーで調べ、会話を表示する</li>
+  <li><b>拾う</b>：鍵などのキーアイテムを手に入れる（<kbd>Tab</kbd> で所持品を確認）</li>
+  <li><b>フラグ</b>：「メモを読んだ」などの進行状況を記録し、会話や出来事を変化させる</li>
+  <li><b>扉</b>：開け閉めできる扉。鍵を持っていれば開く施錠扉</li>
+  <li><b>ジャンプスケア</b>：幽霊の出現・突進・画面揺れ・強制的に振り向かせる演出</li>
+  <li><b>雰囲気</b>：暗い照明・霧・ちらつくライト・懐中電灯・画面効果</li>
+</ul>
+
+<h3 id="s0-2">0-2　まず覚える6つの言葉</h3>
+<table>
+  <tr><th>言葉</th><th>意味</th><th>例</th></tr>
+  <tr><td><b>イベント</b></td><td>「何かが起きる場所」。オブジェクトに <code>HorrorEvent</code> を付けると、そのオブジェクトがイベントになる</td><td>机のメモ、古いラジオ</td></tr>
+  <tr><td><b>ページ</b></td><td>イベントの中の「状況ごとの反応」。1つのイベントに複数持てる</td><td>ラジオの「普段」「メモを読んだ後」</td></tr>
+  <tr><td><b>起動方法</b></td><td>ページが動くきっかけ。<br>「調べる」「エリアに入る」「自動実行」の3種類</td><td>近づいて <kbd>E</kbd>／通路を通る</td></tr>
+  <tr><td><b>出現条件</b></td><td>そのページが有効になるための条件</td><td>「鍵を持っている」とき</td></tr>
+  <tr><td><b>コマンド</b></td><td>ページで実行する命令。上から順に実行される</td><td>会話を出す／鍵を渡す</td></tr>
+  <tr><td><b>フラグ・アイテム</b></td><td>進行状況（ON/OFF）と、手に入れた物。<br>マネージャーで名前（ID）を登録して使う</td><td><code>read_note</code>、<code>rusty_key</code></td></tr>
+</table>
+
+<h3 id="s0-3">0-3　デモを遊んでみる</h3>
+<ol class="steps">
+  <li>Project ウィンドウで <code>Assets/_Project/Scenes/HorrorDemo.unity</code> をダブルクリックして開きます。</li>
+  <li>上部の再生ボタン ▶ を押します。画面が暗転し、最初の独り言が表示されます。</li>
+  <li>ゲーム画面を一度クリックするとマウスで視点を動かせます（<kbd>Esc</kbd> でカーソルが戻ります）。</li>
+</ol>
+<div class="row">
+  <figure><img src="images/g_opening.jpg"><figcaption>図0-1　開始直後。暗転の中で独り言</figcaption></figure>
+  <figure><img src="images/g_controls.jpg"><figcaption>図0-2　明転後に操作説明が出る</figcaption></figure>
+</div>
+<table>
+  <tr><th>操作</th><th>キーボード・マウス</th><th>ゲームパッド</th></tr>
+  <tr><td>移動／視点</td><td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd>／マウス</td><td>左スティック／右スティック</td></tr>
+  <tr><td>調べる・会話を送る</td><td><kbd>E</kbd>・左クリック（会話は <kbd>Space</kbd> <kbd>Enter</kbd> でも可）</td><td>A</td></tr>
+  <tr><td>懐中電灯</td><td><kbd>F</kbd></td><td>Y</td></tr>
+  <tr><td>走る／しゃがむ</td><td><kbd>Shift</kbd>／<kbd>C</kbd></td><td>左スティック押し込み／B</td></tr>
+  <tr><td>所持品</td><td><kbd>Tab</kbd>（<kbd>W</kbd><kbd>S</kbd> で選択）</td><td>Select</td></tr>
+</table>
+<figure class="w70"><img src="images/g_inventory.jpg"><figcaption>図0-3　所持品画面（Tab）。アイテムの説明文はマネージャーで設定したもの</figcaption></figure>
+
+<h3 id="s0-4" class="newpage">0-4　デモシーンの地図</h3>
+<p>デモは「部屋A → 廊下 → 部屋B」の一本道です。下の図はシーンビューで天井と照明を消して上から見たものです。<span style="color:#2a9ebf;font-weight:700">水色のラベル</span>は「調べる」イベント、<span style="color:#c98a1a;font-weight:700">オレンジの箱</span>は「エリアに入る」イベントの範囲です。</p>
+<figure><img src="images/s_overview.png"><figcaption>図0-4　デモシーン全体（シーンビュー、照明オフ）</figcaption></figure>
+<ol class="map-legend">
+  <li><span class="num">1</span><b>オープニング</b>：開始時に自動で動く（→1-1）</li>
+  <li><span class="num">2</span><b>机のメモ</b>：調べると拾える（→1-2）</li>
+  <li><span class="num">3</span><b>古いラジオ</b>：状況で会話が変わる（→1-3）</li>
+  <li><span class="num">4</span><b>廊下の棚</b>：メモを読むと鍵が見つかる（→1-4）</li>
+  <li><span class="num">5</span><b>廊下のジャンプスケア</b>：鍵を持って通ると出る（→1-5）</li>
+  <li><span class="num">6</span><b>奥の扉</b>：鍵で開く（→1-6）</li>
+  <li><span class="num">7</span><b>デモ終了</b>：部屋Bに入ると暗転（→1-7）</li>
+</ol>
+<div class="row r-60-40">
+  <div>
+    <h4>Hierarchy の構成</h4>
+    <table>
+      <tr><th>グループ</th><th>中身</th></tr>
+      <tr><td><code>Environment</code></td><td>部屋・廊下・家具（Props）・照明（Lights）・扉（Doors）</td></tr>
+      <tr><td><code>[HorrorKit Systems]</code></td><td>イベントを実行する係（EventRunner）</td></tr>
+      <tr><td><code>[HorrorKit HUD]</code></td><td>会話ウィンドウなどの画面表示</td></tr>
+      <tr><td><code>Player</code></td><td>プレイヤー本体・視点（CameraRoot）・懐中電灯</td></tr>
+      <tr><td><code>Main Camera</code><br><code>PlayerCamera</code></td><td>Cinemachine のカメラ</td></tr>
+      <tr><td><code>JumpScare_Ghost</code></td><td>幽霊の演出（非表示の Ghost を含む）</td></tr>
+      <tr><td><code>Events</code></td><td>見た目を持たないイベント（オープニング・エリア）</td></tr>
+    </table>
+    <div class="box tip"><span class="label">ヒント</span>メモ・ラジオ・棚のように<b>見た目がある物は、その物自体にイベントを付けて</b>います。Events フォルダにあるのは、見た目のない「きっかけ」だけです。</div>
+  </div>
+  <figure><img src="images/h_hierarchy.png"><figcaption>図0-5　Hierarchy</figcaption></figure>
+</div>
+
+<h3 id="s0-5" class="newpage">0-5　イベントが動くしくみ（ページのルール）</h3>
+<p>ここが一番大切なルールです。イベントに複数のページがあるとき、HorrorKit は<b>番号の大きいページから順に</b>「出現条件を満たしているか」を調べ、<b>最初に満たしたページだけ</b>を使います。</p>
+<div class="pages-flow">
+  <div class="pg ng"><b>ページ4</b>条件：幽霊を見た<br>→ まだ見ていない ✕</div>
+  <div class="arrow">→</div>
+  <div class="pg ng"><b>ページ3</b>条件：鍵を持っている<br>→ 持っていない ✕</div>
+  <div class="arrow">→</div>
+  <div class="pg ok"><b>ページ2</b>条件：メモを読んだ<br>→ 読んだ ◯ <b>これを使う</b></div>
+  <div class="arrow">→</div>
+  <div class="pg ng"><b>ページ1</b>条件なし<br>（見に行かない）</div>
+</div>
+<p class="small" style="text-align:center">図0-6　ラジオを調べたときの判定の例（メモを読んだ後）</p>
+<div class="box point"><span class="label">つまり</span>
+  <ul>
+    <li><b>ページ1 には「普段の反応」</b>を置き、条件なしにする（最後の受け皿）。</li>
+    <li>話が進むほど起きる反応を、<b>後ろのページに足していく</b>。</li>
+    <li>「一度だけ実行」に印を付けたページは、1回実行するとスキップされ、次に条件を満たす下のページが使われる。</li>
+  </ul>
+</div>
+<p>起動方法は3種類あります。</p>
+<table>
+  <tr><th>起動方法</th><th>動くタイミング</th><th>必要な Collider</th></tr>
+  <tr><td>調べる（決定キー）</td><td>プレイヤーが近くで見つめて <kbd>E</kbd> を押したとき。画面に「[E] 調べる」が出る</td><td>通常の Collider（Is Trigger オフ）</td></tr>
+  <tr><td>エリアに入る</td><td>プレイヤーが範囲に入った瞬間</td><td>Is Trigger オンの Collider</td></tr>
+  <tr><td>自動実行</td><td>ページが有効になった瞬間（ゲーム開始時や、フラグが変わったとき）。必ず1回だけ</td><td>不要</td></tr>
+</table>
+<div class="box warn"><span class="label">注意</span>イベントの実行中はプレイヤーは動けません。会話を最後まで送るとまた動けるようになります。</div>
+
+<!-- ============ 第1章 ============ -->
+<h2 class="chapter" id="ch1"><span class="no">第1章</span>サンプルのギミックを読み解く</h2>
+<p>デモにある7つのギミックを、「<b>ゲームでの見え方</b> → <b>シーン上の場所</b> → <b>設定画面</b> → <b>ポイント</b>」の順に見ていきます。設定画面はマネージャー（第3章）の画面ですが、Hierarchy でオブジェクトを選んだときのインスペクターにも同じものが出ます。</p>
+
+<h3 id="s1-1">1-1　オープニング（自動実行）</h3>
+<div class="gimmick-head"><span class="tag red">自動実行</span><span class="tag">フェード</span><span class="tag">会話</span><span class="tag">場所：Events / Event_Intro</span></div>
+<figure class="w85"><img src="images/e_intro.png"><figcaption>設定：起動方法「自動実行」。ゲーム画面は図0-1・0-2</figcaption></figure>
+<table>
+  <tr><th>順</th><th>コマンド</th><th>内容</th></tr>
+  <tr><td>1</td><td>演出/フェードアウト</td><td>秒数 0 ＝ 一瞬で真っ暗にする</td></tr>
+  <tr><td>2</td><td>会話/メッセージ</td><td>「……ここは、どこだ。」</td></tr>
+  <tr><td>3</td><td>演出/フェードイン</td><td>2秒かけて明るくする</td></tr>
+  <tr><td>4</td><td>会話/メッセージ</td><td>操作説明（<code>&lt;size=26&gt;</code> で文字を小さく）</td></tr>
+</table>
+<div class="box point"><span class="label">ポイント</span>
+  <ul>
+    <li>見た目のない空のオブジェクトに <code>HorrorEvent</code> を付けただけ。Collider も不要です。</li>
+    <li>フェードアウト中でも会話ウィンドウは見えるので、<b>暗闇の独り言</b>が作れます。</li>
+    <li>会話の文章には <code>&lt;size=26&gt;…&lt;/size&gt;</code>（大きさ）や <code>&lt;color=#ff4444&gt;…&lt;/color&gt;</code>（色）が使えます。</li>
+  </ul>
+</div>
+
+<h3 id="s1-2" class="newpage">1-2　机のメモ（拾うアイテム）</h3>
+<div class="gimmick-head"><span class="tag red">調べる</span><span class="tag">一度だけ実行</span><span class="tag">アイテム入手</span><span class="tag">フラグON</span><span class="tag">場所：Environment / Props / Note</span></div>
+<div class="row">
+  <figure><img src="images/g_note_prompt.jpg"><figcaption>① 見つめると「[E] 調べる」</figcaption></figure>
+  <figure><img src="images/g_note_msg.jpg"><figcaption>② 調べるとメモの内容</figcaption></figure>
+</div>
+<div class="row">
+  <figure><img src="images/g_item_get.jpg"><figcaption>③「破れたメモ」を入手（自動で表示）</figcaption></figure>
+  <figure><img src="images/s_note.png"><figcaption>シーン：水色の枠が「調べられる範囲」</figcaption></figure>
+</div>
+<figure class="w85"><img src="images/e_note.png"><figcaption>設定：一度だけ実行、5つのコマンド</figcaption></figure>
+<div class="box point"><span class="label">ポイント</span>
+  <ul>
+    <li><b>「アイテム/入手」</b>で所持品に入り、「〇〇を手に入れた。」は自動で表示されます（出したくなければ「通知を出さない」）。</li>
+    <li><b>「フラグ/設定」</b>で <code>read_note</code> を ON。これがラジオと棚の反応を変えるスイッチになります。</li>
+    <li><b>「制御/オブジェクト表示切替」</b>でメモ自身を消して「拾った」ように見せています。</li>
+    <li>メモは薄くて小さいので、<b>BoxCollider を実物より大きく</b>して狙いやすくしています（シーンの水色の枠）。</li>
+  </ul>
+</div>
+
+<h3 id="s1-3" class="newpage">1-3　古いラジオ（フラグで会話が変わる）</h3>
+<div class="gimmick-head"><span class="tag red">調べる</span><span class="tag">4ページ</span><span class="tag">出現条件</span><span class="tag">話者名</span><span class="tag">場所：Environment / Props / Radio</span></div>
+<div class="row">
+  <figure><img src="images/g_radio.jpg"><figcaption>メモを読んだ後に調べると、ラジオから声</figcaption></figure>
+  <figure><img src="images/s_radio.png"><figcaption>シーン：部屋Aの右奥の台の上</figcaption></figure>
+</div>
+<p>ラジオは<b>同じ物なのに、ゲームの進み具合で反応が4通りに変わります</b>。0-5 のルールそのものです。</p>
+<table>
+  <tr><th>ページ</th><th>出現条件</th><th>一度だけ</th><th>反応</th></tr>
+  <tr><td>1 通常</td><td>なし</td><td></td><td>「古いラジオだ。」「ノイズしか聞こえない。」</td></tr>
+  <tr><td>2 メモを読んだ後</td><td><code>read_note</code> が ON</td><td>◯</td><td>ラジオの声（話者「ラジオ」）→ 懐中電灯が明滅 → <code>heard_radio</code> を ON</td></tr>
+  <tr><td>3 鍵を持っている</td><td><code>rusty_key</code> を所持</td><td></td><td>「……もう……遅い……」</td></tr>
+  <tr><td>4 あれを見た後</td><td><code>saw_ghost</code> が ON</td><td></td><td>「ラジオは完全に沈黙している。」</td></tr>
+</table>
+<figure class="w85"><img src="images/e_radio_p1.png"><figcaption>ページ1：条件なし（普段の反応）</figcaption></figure>
+<figure class="w85"><img src="images/e_radio_p2.png"><figcaption>ページ2：出現条件に「フラグがON read_note」、一度だけ実行</figcaption></figure>
+<figure class="w85"><img src="images/e_radio_p3.png"><figcaption>ページ3：出現条件に「アイテムを所持 rusty_key」</figcaption></figure>
+<figure class="w85"><img src="images/e_radio_p4.png"><figcaption>ページ4：出現条件に「フラグがON saw_ghost」</figcaption></figure>
+<div class="box point"><span class="label">反応の移り変わり</span>
+  <ol>
+    <li>最初に調べる → ページ1（ノイズ）</li>
+    <li>メモを読んで調べる → ページ2（声）。一度だけなので、もう一度調べると ページ1 に戻る</li>
+    <li>鍵を拾ってから調べる → ページ3</li>
+    <li>幽霊を見た後に調べる → ページ4（ページ3より番号が大きいので優先）</li>
+  </ol>
+</div>
+<div class="box tip"><span class="label">ヒント</span>会話の「話者（任意）」に名前を入れると、ウィンドウの左上に名前の札が出ます。空欄なら主人公の心の声のような表示になります。</div>
+
+<h3 id="s1-4" class="newpage">1-4　廊下の棚（条件付きで鍵が見つかる）</h3>
+<div class="gimmick-head"><span class="tag red">調べる</span><span class="tag">2ページ</span><span class="tag">見た目と判定が別</span><span class="tag">場所：Environment / Props / Shelf</span></div>
+<div class="row">
+  <figure><img src="images/g_shelf_prompt.jpg"><figcaption>棚の中段に鍵が見える</figcaption></figure>
+  <figure><img src="images/g_key_get.jpg"><figcaption>調べると鍵が消えて「錆びた鍵」を入手</figcaption></figure>
+</div>
+<figure class="w70"><img src="images/e_shelf_p1.png"><figcaption>ページ1：「埃をかぶった棚だ。」</figcaption></figure>
+<figure class="w85"><img src="images/e_shelf_p2.png"><figcaption>ページ2：メモを読んだら鍵が手に入る（一度だけ）</figcaption></figure>
+<figure class="w70"><img src="images/s_shelf.png"><figcaption>シーン：棚は板を組み合わせた作り。鍵（RustyKey）は別のオブジェクト</figcaption></figure>
+<div class="box point"><span class="label">ポイント</span>
+  <ul>
+    <li>メモを読む前は ページ1 しか満たさないので、鍵が見えていても手に入りません。<b>「ヒントを見てから見つかる」</b>作りです。</li>
+    <li>棚は複数の板でできていて、<code>HorrorEvent</code> は親の <code>Shelf</code> に付いています。<b>どの板を調べても親のイベントが動きます</b>。</li>
+    <li>鍵の見た目（<code>RustyKey</code>）は別オブジェクト。「表示切替」の対象にそれを指定して消しています。</li>
+  </ul>
+</div>
+
+<h3 id="s1-5" class="newpage">1-5　廊下の幽霊（エリア＋ジャンプスケア）</h3>
+<div class="gimmick-head"><span class="tag red">エリアに入る</span><span class="tag">一度だけ実行</span><span class="tag">ジャンプスケア</span><span class="tag">場所：Events / Event_GhostArea ＋ JumpScare_Ghost</span></div>
+<div class="row">
+  <figure><img src="images/g_jumpscare.jpg"><figcaption>鍵を持って廊下を戻ると、奥から幽霊が突進</figcaption></figure>
+  <figure><img src="images/s_ghost.png"><figcaption>シーン：オレンジの箱が「きっかけの範囲」。黒い人影が幽霊（普段は非表示）</figcaption></figure>
+</div>
+<p>このギミックは<b>2つの部品</b>でできています。</p>
+<table>
+  <tr><th>部品</th><th>役割</th></tr>
+  <tr><td><code>Event_GhostArea</code>（HorrorEvent）</td><td><b>いつ起きるか</b>を決める。廊下をふさぐ Is Trigger の箱。「鍵を持っている」ときだけ、一度だけ動く</td></tr>
+  <tr><td><code>JumpScare_Ghost</code>（JumpScare）</td><td><b>何が起きるか</b>を決める。幽霊の出現・突進・画面揺れなど</td></tr>
+</table>
+<figure class="w85"><img src="images/e_ghostarea.png"><figcaption>Event_GhostArea の設定：ジャンプスケア → フラグ → 待機 → 独り言</figcaption></figure>
+<div class="row">
+  <figure><img src="images/i_ghostarea_collider.png"><figcaption>Event_GhostArea の BoxCollider。Is Trigger がオン</figcaption></figure>
+  <figure><img src="images/i_jumpscare.png"><figcaption>JumpScare_Ghost の設定</figcaption></figure>
+</div>
+<table>
+  <tr><th>JumpScare の項目</th><th>意味</th><th>デモの値</th></tr>
+  <tr><td>Scare Object</td><td>演出中だけ現れる物（普段は非表示にしておく）</td><td>Ghost</td></tr>
+  <tr><td>Lunge Target／Lunge Time</td><td>突進の行き先と、そこまでの秒数</td><td>LungeTarget／0.3秒</td></tr>
+  <tr><td>Force Look／Look Point</td><td>プレイヤーの視点を強制的に向けさせる点</td><td>幽霊の頭（Head）</td></tr>
+  <tr><td>Fov Kick</td><td>一瞬ズームする量（マイナスでズームイン）</td><td>-14</td></tr>
+  <tr><td>Impulse／Impulse Force</td><td>Cinemachine の画面揺れと強さ</td><td>1.2</td></tr>
+  <tr><td>Scare Sound</td><td>驚かせる音（未設定なら無音）</td><td>なし</td></tr>
+  <tr><td>Flicker Flashlight</td><td>懐中電灯を明滅させる</td><td>オン</td></tr>
+  <tr><td>Duration／Play Once</td><td>演出の長さ／一度しか出さない</td><td>1.3秒／オン</td></tr>
+</table>
+<div class="box tip"><span class="label">ヒント</span>演出の後に「待機 0.5秒」を入れてから独り言を出すと、驚いた後の<b>間</b>が生まれます。</div>
+
+<h3 id="s1-6" class="newpage">1-6　鍵のかかった扉</h3>
+<div class="gimmick-head"><span class="tag red">Door コンポーネント</span><span class="tag">鍵アイテム</span><span class="tag">場所：Environment / Doors / Door_Locked</span></div>
+<div class="row">
+  <figure><img src="images/g_door_prompt.jpg"><figcaption>「[E] 開ける（施錠）」</figcaption></figure>
+  <figure><img src="images/g_door_locked.jpg"><figcaption>鍵がないとき：施錠メッセージ</figcaption></figure>
+</div>
+<div class="row">
+  <figure><img src="images/g_door_unlock.jpg"><figcaption>鍵があるとき：自動で解錠して開く</figcaption></figure>
+  <figure><img src="images/s_door.png"><figcaption>シーン：扉は蝶番（ヒンジ）の位置を軸に回る</figcaption></figure>
+</div>
+<div class="row r-60-40">
+  <div>
+    <p>扉は <code>HorrorEvent</code> ではなく、専用の <b><code>Door</code></b> コンポーネントです。ページを作らなくても、項目を埋めるだけで施錠扉になります。</p>
+    <table>
+      <tr><th>項目</th><th>意味</th></tr>
+      <tr><td>Open Angle</td><td>開く角度。逆向きに開くならマイナス</td></tr>
+      <tr><td>Locked</td><td>施錠されているか</td></tr>
+      <tr><td>Key Item Id</td><td>開けるのに必要なアイテム（一覧から選ぶ）</td></tr>
+      <tr><td>Consume Key</td><td>開けたら鍵を失う</td></tr>
+      <tr><td>Locked Message</td><td>鍵がないときの文章</td></tr>
+      <tr><td>Unlock Message</td><td>開けたときの文章。<code>{0}</code> がアイテム名になる</td></tr>
+      <tr><td>Unlock Flag</td><td>開けたときに ON にするフラグ</td></tr>
+      <tr><td>Player Can Use</td><td>オフにするとプレイヤーは触れず、イベントのコマンドからだけ開閉できる</td></tr>
+    </table>
+  </div>
+  <figure><img src="images/i_door_locked.png"><figcaption>Door_Locked の設定</figcaption></figure>
+</div>
+
+<h3 id="s1-7" class="newpage">1-7　デモ終了（暗転演出）</h3>
+<div class="gimmick-head"><span class="tag red">エリアに入る</span><span class="tag">フェード</span><span class="tag">場所：Events / Event_End</span></div>
+<div class="row">
+  <figure><img src="images/g_end.jpg"><figcaption>部屋Bに入ると暗転してメッセージ</figcaption></figure>
+  <figure><img src="images/s_end.png"><figcaption>シーン：部屋B全体をおおうエリア</figcaption></figure>
+</div>
+<figure class="w85"><img src="images/e_end.png"><figcaption>設定：独り言 → フェードアウト → メッセージ → フェードイン</figcaption></figure>
+<div class="box point"><span class="label">ポイント</span>フェードアウトで真っ暗にしてから文章を出すと、場面転換やエンディングの雰囲気になります。最後にフェードインを入れ忘れると、画面が暗いまま戻らないので注意。</div>
+
+<h3 id="s1-8" class="newpage">1-8　雰囲気づくりの部品（照明・懐中電灯・プレイヤー）</h3>
+<h4>ちらつく照明（FlickerLight）</h4>
+<div class="row">
+  <figure><img src="images/s_lamp.png"><figcaption>机の上のランプ（DeskLamp）</figcaption></figure>
+  <figure><img src="images/i_flicker.png"><figcaption>FlickerLight の設定</figcaption></figure>
+</div>
+<table>
+  <tr><th>項目</th><th>意味</th></tr>
+  <tr><td>Flicker Amount</td><td>揺らぎの大きさ（0＝一定、1＝大きく揺れる）</td></tr>
+  <tr><td>Speed</td><td>揺らぎの速さ</td></tr>
+  <tr><td>Blackout Chance／Duration</td><td>1秒あたりに一瞬消える確率と、消えている時間</td></tr>
+  <tr><td>Emissive Renderer</td><td>電球の見た目。光と一緒に明るさが変わる</td></tr>
+</table>
+<p class="small">デモでは廊下の照明を大きく・頻繁にちらつかせ、机のランプは控えめにしています。</p>
+
+<h4>懐中電灯（Flashlight）とプレイヤー（FirstPersonController）</h4>
+<div class="row">
+  <figure><img src="images/i_flashlight.png"><figcaption>Player / Flashlight</figcaption></figure>
+  <figure><img src="images/i_player.png"><figcaption>Player（移動・視点・しゃがみ・揺れ）</figcaption></figure>
+</div>
+<table>
+  <tr><th>よく触る項目</th><th>意味</th></tr>
+  <tr><td>Flashlight：Require Item／Required Item Id</td><td>懐中電灯を「拾うまで使えない」ようにする</td></tr>
+  <tr><td>Flashlight：Use Battery／Drain Per Second</td><td>電池の消費。少なくなると暗く不安定になる</td></tr>
+  <tr><td>Flashlight：Follow Sharpness</td><td>視点への追従の速さ。小さいほど光が遅れて揺れる</td></tr>
+  <tr><td>Player：Walk / Sprint / Crouch Speed</td><td>歩く・走る・しゃがみの速さ</td></tr>
+  <tr><td>Player：Mouse Sensitivity</td><td>マウス感度</td></tr>
+  <tr><td>Player：Idle / Walk / Sprint Noise</td><td>立ち止まり・歩き・走りのときの画面の揺れの強さ</td></tr>
+  <tr><td>Player：Footstep Clips</td><td>足音（音声ファイルを入れると鳴る）</td></tr>
+  <tr><td>PlayerInteractor：Distance</td><td>調べられる距離（初期 2.2m）</td></tr>
+</table>
+<div class="box tip"><span class="label">ヒント</span>懐中電灯の明るさは <code>Player/Flashlight</code> の Light の <b>Intensity</b>、霧の濃さは <span class="menu">Window &gt; Rendering &gt; Lighting</span> の Environment タブの <b>Fog</b>、画面全体の明るさや色味は <code>HorrorKit/Settings/HorrorVolumeProfile</code> の <b>Color Adjustments</b> で調整できます。</div>
+
+<!-- ============ 第2章 ============ -->
+<h2 class="chapter" id="ch2"><span class="no">第2章</span>新しいギミックを作る</h2>
+
+<h3 id="s2-0">2-0　作業の流れと、新しいシーンの準備</h3>
+<p>どのギミックも、基本は次の4ステップです。</p>
+<ol class="steps">
+  <li><b>名前を登録する</b>：使うアイテムやフラグをマネージャーに登録（2-1）</li>
+  <li><b>置く</b>：Hierarchy を右クリック → <span class="menu">HorrorKit</span> から部品を置く</li>
+  <li><b>設定する</b>：インスペクターでページ・条件・コマンドを決める</li>
+  <li><b>試す</b>：再生して確認。うまくいかなければデバッグタブ（3-5）で状態を確認</li>
+</ol>
+<div class="menu-wrap">
+  <div class="menu-mock">
+    <div>Create Empty</div><div>3D Object ▸</div><div>Light ▸</div><div class="sep"></div>
+    <div class="hl">HorrorKit ▸</div><div class="sep"></div><div>…</div>
+  </div>
+  <div class="menu-mock sub">
+    <div>調べるイベント</div><div>エリアイベント</div><div>ドア</div><div>ジャンプスケア</div><div>ちらつくライト</div>
+  </div>
+</div>
+<p class="small" style="text-align:center">図2-1　Hierarchy の右クリックメニュー（上部メニューの GameObject &gt; HorrorKit にも同じものがあります）。オブジェクトを選んだ状態で右クリックすると、その子として作られます。</p>
+
+<h4>新しいシーンで HorrorKit を使うとき</h4>
+<table>
+  <tr><th>メニュー</th><th>やってくれること</th></tr>
+  <tr><td><span class="menu">HorrorKit &gt; セットアップ &gt; プレイヤー一式を配置</span></td><td>プレイヤー・懐中電灯・Cinemachine カメラ・画面表示・イベント実行係をまとめて置く</td></tr>
+  <tr><td><span class="menu">HorrorKit &gt; セットアップ &gt; ライティング・フォグ・ポストプロセスを適用</span></td><td>暗い照明・霧・画面効果をまとめて設定する</td></tr>
+  <tr><td><span class="menu">HorrorKit &gt; セットアップ &gt; デモシーンを新規作成</span></td><td>デモシーンを作り直す（上書きされるので注意）</td></tr>
+</table>
+<div class="box warn"><span class="label">注意</span>プレイヤーが立つための床には Collider が必要です（Plane や Cube なら最初から付いています）。</div>
+
+<h3 id="s2-1" class="newpage">2-1　アイテムとフラグを登録する</h3>
+<p>アイテムとフラグは、イベントで使う前に <span class="menu">HorrorKit &gt; マネージャー</span>（<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd>）で登録します。登録すると、イベントの設定で<b>一覧から選べる</b>ようになります。</p>
+<figure><img src="images/m_items.png"><figcaption>図2-2　アイテムタブ。右下の ＋ で追加</figcaption></figure>
+<ol class="steps">
+  <li>アイテムタブを開き、一覧の右下の <b>＋</b> を押します。</li>
+  <li><b>ID</b>（プログラム用の名前）を半角英数字で決めます。例：<code>battery</code>、<code>old_photo</code></li>
+  <li><b>表示名</b>（ゲーム画面に出る名前）と<b>説明</b>（所持品画面に出る文）を入れます。</li>
+</ol>
+<figure><img src="images/m_flags.png"><figcaption>図2-3　フラグタブ。「初期値」はゲーム開始時の ON/OFF</figcaption></figure>
+<div class="box tip"><span class="label">名前の付け方のコツ</span>
+  <ul>
+    <li>IDは<b>半角の英小文字・数字・アンダーバー</b>だけにする（例：<code>saw_ghost</code>）。</li>
+    <li>フラグは「〜した」で考えると分かりやすい：<code>read_note</code>（メモを読んだ）、<code>power_on</code>（電気がついた）</li>
+    <li>説明欄にメモを書いておくと、一覧やドロップダウンに表示されて迷いません。</li>
+  </ul>
+</div>
+<div class="box warn"><span class="label">注意</span>赤く表示された行は、IDが空欄か、他と重複しています。そのままだと正しく動きません。</div>
+
+<h3 id="s2-2" class="newpage">2-2　調べるだけのオブジェクト</h3>
+<p>例：「古い絵画を調べると独り言」</p>
+<ol class="steps">
+  <li>絵画のモデル（または Cube）をシーンに置きます。</li>
+  <li>その絵画を選び、<span class="menu">Add Component</span> で <code>HorrorEvent</code> を追加します。<br>
+      <span class="small">または Hierarchy 右クリック → HorrorKit → 調べるイベント で、Collider 付きの空オブジェクトを作り、絵画の前に置いてもOK。</span></li>
+  <li>インスペクターに下のような<b>黄色い警告</b>が出たら、<b>「BoxCollider を追加」</b>を押します。</li>
+  <li>「実行内容」の ＋ でコマンドを追加し、「会話/メッセージ」を選んで本文を書きます。</li>
+  <li>「表示する行動名」を「見る」などに変えると、画面の表示が「[E] 見る」になります。</li>
+</ol>
+<div class="row">
+  <figure><img src="images/n_warning.png"><figcaption>Collider がないと警告が出る。ボタン1つで追加できる</figcaption></figure>
+  <figure><img src="images/n_interact.png"><figcaption>メニューの「調べるイベント」で作った直後の状態</figcaption></figure>
+</div>
+<div class="box tip"><span class="label">ヒント</span>会話を複数に分けたいときは、「会話/メッセージ」コマンドを複数並べます。1つの本文の中で改行（<kbd>Enter</kbd>）することもできます。</div>
+
+<h3 id="s2-3" class="newpage">2-3　拾えるアイテム</h3>
+<p>例：「床の電池を拾う」（1-2 の机のメモと同じ作り）</p>
+<ol class="steps">
+  <li>2-1 でアイテム <code>battery</code>（表示名「電池」）を登録しておきます。</li>
+  <li>電池のモデルに <code>HorrorEvent</code> と Collider を付けます。小さい物は Collider を大きめに。</li>
+  <li>ページの設定：表示する行動名「拾う」、<b>一度だけ実行</b>にチェック。</li>
+  <li>コマンドを3つ並べます。
+    <table style="margin-top:1.5mm">
+      <tr><th>順</th><th>コマンド</th><th>設定</th></tr>
+      <tr><td>1</td><td>会話/メッセージ</td><td>「床に電池が落ちている。」（省略可）</td></tr>
+      <tr><td>2</td><td>アイテム/入手</td><td>アイテム：battery</td></tr>
+      <tr><td>3</td><td>制御/オブジェクト表示切替</td><td>対象：電池自身、「表示する」のチェックを外す</td></tr>
+    </table>
+  </li>
+</ol>
+<div class="row">
+  <figure><img src="images/n_pickup.png"><figcaption>設定例。アイテム欄が赤く「⚠ battery（未登録）」なのは、まだ登録していないため</figcaption></figure>
+  <div>
+    <div class="box warn"><span class="label">登録を忘れたら</span>先にイベントを作ってしまっても大丈夫です。マネージャーのアイテムタブに「未登録のIDがシーンで使われています」と出るので、<b>「未登録IDをすべて登録」</b>を押せば一括で登録されます。その後、表示名と説明を書き足してください。</div>
+    <figure><img src="images/m_items_missing.png"><figcaption>未登録IDの警告と一括登録ボタン</figcaption></figure>
+  </div>
+</div>
+
+<h3 id="s2-4" class="newpage">2-4　状況で反応が変わるもの（ページを増やす）</h3>
+<p>例：「冷蔵庫。普段は『空っぽだ』。電気がついた後は『中から音がする…』」</p>
+<ol class="steps">
+  <li>冷蔵庫にイベントを作り、ページ1に「空っぽだ。」を設定します（条件なし）。</li>
+  <li>インスペクターの <b>「＋ 新規ページ」</b> を押して ページ2 を作ります。</li>
+  <li>ページ2 の「出現条件」の ＋ で条件を追加し、「フラグがON」「power_on」を選びます。</li>
+  <li>ページ2 のコマンドに「中から音がする…」を書きます。</li>
+  <li>別の場所（ブレーカーなど）のイベントに「フラグ/設定 power_on を ON」を入れます。</li>
+</ol>
+<div class="box point"><span class="label">ページ操作ボタン</span>
+  <table style="margin:1mm 0 0">
+    <tr><th>＋ 新規ページ</th><td>空のページを最後に追加</td></tr>
+    <tr><th>複製</th><td>今のページをコピーして次に追加（少しだけ違うページを作るときに便利）</td></tr>
+    <tr><th>◀ ▶</th><td>ページの順番を入れ替え（番号が大きいほど優先）</td></tr>
+    <tr><th>削除</th><td>今のページを削除</td></tr>
+  </table>
+</div>
+<div class="box tip"><span class="label">条件の組み合わせ</span>出現条件は複数並べると<b>「すべて満たしたとき」</b>になります。例：「フラグがON power_on」＋「アイテムを未所持 battery」＝「電気がついていて、まだ電池を持っていない」とき。</div>
+
+<h3 id="s2-5" class="newpage">2-5　エリアに入ると起きるイベント</h3>
+<p>例：「廊下を通ると、背後で物音がする」</p>
+<ol class="steps">
+  <li>Hierarchy 右クリック → <span class="menu">HorrorKit → エリアイベント</span>。オレンジの箱が付いたオブジェクトができます。</li>
+  <li>通路をふさぐように移動し、BoxCollider の <b>Size</b> で箱の大きさを通路に合わせます。</li>
+  <li>起動方法が「エリアに入る」、<b>一度だけ実行</b>にチェックが入っていることを確認します。</li>
+  <li>コマンドに「演出/効果音」「演出/懐中電灯を明滅」「会話/メッセージ」などを並べます。</li>
+</ol>
+<figure class="w60"><img src="images/n_area.png"><figcaption>エリアイベントを作った直後。BoxCollider の Is Trigger がオン</figcaption></figure>
+<div class="box warn"><span class="label">注意</span>「一度だけ実行」を外すと、<b>範囲に入るたびに</b>毎回起きます。何度も起きてほしいとき以外はチェックを入れておきましょう。</div>
+
+<h3 id="s2-6" class="newpage">2-6　鍵付きの扉</h3>
+<ol class="steps">
+  <li>Hierarchy 右クリック → <span class="menu">HorrorKit → ドア</span>。親（蝶番）と子の板（Panel）のセットができます。</li>
+  <li>親を、扉の<b>蝶番の位置</b>に置きます（板は親を軸に回ります）。</li>
+  <li>開く向きが逆なら <b>Open Angle</b> をマイナスにします（例：-100）。</li>
+  <li>鍵を掛けるなら <b>Locked</b> にチェック、<b>Key Item Id</b> で鍵アイテムを選びます。</li>
+  <li>Locked Message（鍵がないときの文）を書き換えます。</li>
+</ol>
+<div class="row">
+  <figure><img src="images/n_door.png"><figcaption>ドアを作った直後</figcaption></figure>
+  <div>
+    <div class="box tip"><span class="label">自分の扉モデルを使う</span>
+      <ol>
+        <li>メニューで作ったドアの子 <code>Panel</code> と <code>Knob</code> を削除</li>
+        <li>自分の扉モデルを親の子にし、扉の端が親の位置（蝶番）に来るよう位置をずらす</li>
+        <li>扉モデルに Collider を付ける</li>
+      </ol>
+    </div>
+    <div class="box point"><span class="label">イベントから扉を操作する</span>コマンドの「ドア/開ける・閉める・施錠・解錠」で、イベントから扉を動かせます。例：「エリアに入ると背後の扉がバタンと閉まって施錠される」。この場合、扉の <b>Player Can Use</b> を外すと、プレイヤーは開けられなくなります。</div>
+  </div>
+</div>
+
+<h3 id="s2-7" class="newpage">2-7　ジャンプスケア</h3>
+<ol class="steps">
+  <li>Hierarchy 右クリック → <span class="menu">HorrorKit → ジャンプスケア</span>。</li>
+  <li>子の <code>ScareObject（差し替えてください）</code> を削除し、代わりに幽霊のモデルを子に入れます。</li>
+  <li>幽霊モデルを<b>非表示（インスペクター左上のチェックを外す）</b>にし、JumpScare の <b>Scare Object</b> に指定します。</li>
+  <li>幽霊モデルの Collider は外します（プレイヤーがぶつかって止まるのを防ぐ）。</li>
+  <li>突進させるなら空のオブジェクトを行き先に置き、<b>Lunge Target</b> に指定します。</li>
+  <li>顔に視点を向けさせるなら、顔の位置のオブジェクトを <b>Look Point</b> に指定します。</li>
+  <li><b>Scare Sound</b> に驚かせる音を入れます。</li>
+  <li>エリアイベント（2-5）のコマンドに <b>「演出/ジャンプスケア」</b> を追加し、このジャンプスケアを指定します。</li>
+</ol>
+<div class="row">
+  <figure><img src="images/n_jumpscare.png"><figcaption>ジャンプスケアを作った直後</figcaption></figure>
+  <div>
+    <div class="box tip"><span class="label">怖くするコツ</span>
+      <ul>
+        <li>エリアに「アイテムを所持」などの条件を付け、<b>油断している帰り道</b>で出す</li>
+        <li>直前に「待機」「懐中電灯を明滅」を入れて<b>溜め</b>を作る</li>
+        <li>演出後に「フラグ/設定」で見たことを記録し、他の会話を変化させる（ラジオのページ4のように）</li>
+      </ul>
+    </div>
+    <div class="box point"><span class="label">固定カメラ演出</span>Cinemachine Camera を別に置いて <b>Focus Camera</b> に指定すると、演出中だけそのカメラに切り替わります。</div>
+  </div>
+</div>
+
+<h3 id="s2-8" class="newpage">2-8　ちらつく照明</h3>
+<div class="row">
+  <div>
+    <ol class="steps">
+      <li>Hierarchy 右クリック → <span class="menu">HorrorKit → ちらつくライト</span>。</li>
+      <li>天井などに移動し、Light の Color・Intensity・Range を調整します。</li>
+      <li>FlickerLight の <b>Flicker Amount</b>（揺らぎ）と <b>Blackout Chance</b>（消える頻度）で性格を決めます。</li>
+      <li>電球のモデルがあれば <b>Emissive Renderer</b> に指定します（マテリアルの Emission をオンにしておく）。</li>
+    </ol>
+    <p class="small">既にある Light に「Add Component → FlickerLight」を追加しても同じです。</p>
+  </div>
+  <figure><img src="images/n_flicker.png"><figcaption>ちらつくライトを作った直後</figcaption></figure>
+</div>
+<table>
+  <tr><th>雰囲気</th><th>Flicker Amount</th><th>Blackout Chance</th></tr>
+  <tr><td>ほぼ安定（部屋のランプ）</td><td>0.05〜0.1</td><td>0〜0.05</td></tr>
+  <tr><td>古い蛍光灯（廊下）</td><td>0.3〜0.4</td><td>0.3</td></tr>
+  <tr><td>今にも切れそう</td><td>0.5 以上</td><td>0.7 以上</td></tr>
+</table>
+
+<h3 id="s2-9">2-9　自分の3Dモデルを使うときのコツ</h3>
+<table>
+  <tr><th>やりたいこと</th><th>コツ</th></tr>
+  <tr><td>複数パーツのモデルを調べたい</td><td>親に <code>HorrorEvent</code> を付ける。Collider はどのパーツに付いていてもよい（棚と同じ）</td></tr>
+  <tr><td>小さな物を調べやすくしたい</td><td>BoxCollider の Size を実物より大きくする（メモと同じ）</td></tr>
+  <tr><td>複雑な形に Collider を付けたい</td><td>MeshCollider も使えるが、BoxCollider の方が軽くて狙いやすい</td></tr>
+  <tr><td>プレハブにして使い回したい</td><td>イベントのコマンドが<b>プレハブの外</b>の物（扉・ジャンプスケアなど）を指していると参照が外れる。拾うアイテムや調べるだけの物はそのままプレハブにできる</td></tr>
+  <tr><td>同じイベントを複製したい</td><td>複製したら<b>オブジェクト名を変える</b>（第4章 Q4）</td></tr>
+</table>
+
+<!-- ============ 第3章 ============ -->
+<h2 class="chapter" id="ch3"><span class="no">第3章</span>管理とテスト</h2>
+
+<h3 id="s3-1">3-1　マネージャーを開く</h3>
+<p>上部メニューの <span class="menu">HorrorKit &gt; マネージャー</span>、またはショートカット <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd> で開きます。5つのタブがあります。</p>
+<table>
+  <tr><th>タブ</th><th>できること</th></tr>
+  <tr><td>アイテム</td><td>キーアイテムの登録・編集。シーン内で使われている場所の確認</td></tr>
+  <tr><td>フラグ</td><td>フラグの登録・編集・初期値</td></tr>
+  <tr><td>イベント</td><td>シーン内の全イベントの一覧と、その場での編集</td></tr>
+  <tr><td>会話テキスト</td><td>シーン内の全会話を一覧で編集</td></tr>
+  <tr><td>デバッグ</td><td>再生中にフラグ・所持品を切り替え、イベントを強制実行</td></tr>
+</table>
+
+<h3 id="s3-2">3-2　イベントタブ（一覧と編集）</h3>
+<figure><img src="images/m_events.png"><figcaption>図3-1　左がシーン内のイベント一覧、右が選んだイベントの設定</figcaption></figure>
+<ul>
+  <li>左の一覧には、各ページの <b>[起動方法] 条件 → コマンド数</b> が1行で表示されます。どのイベントが何をするか、ひと目で分かります。</li>
+  <li>上の検索欄では、イベント名・メモ・<b>会話の本文</b>でも検索できます。</li>
+  <li><b>「参照で絞り込み」</b>でアイテムやフラグを選ぶと、それを使っているイベントだけが表示されます。例：<code>rusty_key</code> を選ぶ → 鍵に関係するイベントが分かる。</li>
+  <li><b>「シーンで選択」「フォーカス」</b>でシーンビューのその場所へ移動します。</li>
+  <li><b>「＋ 調べるイベント」「＋ エリアイベント」</b>で新しいイベントを作れます（シーンビューの中心に置かれます）。</li>
+</ul>
+
+<h3 id="s3-3" class="newpage">3-3　会話テキストタブ（文章の一括編集）</h3>
+<figure><img src="images/m_texts.png"><figcaption>図3-2　会話テキストタブ。「P2-1」はページ2の1番目のコマンド</figcaption></figure>
+<p>シーン内の<b>すべての会話を上から順に</b>並べて表示します。左の欄が話者、右が本文で、ここで直接書き換えられます。文章の見直し（誤字・口調の統一）に便利です。扉の施錠メッセージも一番下に表示されます。</p>
+<div class="box tip"><span class="label">ヒント</span>「開く」ボタンで、そのイベントの設定（イベントタブ）へ移動します。</div>
+
+<h3 id="s3-4">3-4　アイテム／フラグタブ（参照とID変更）</h3>
+<ul>
+  <li>各行の <b>「シーン内の参照 N 件（選択する）」</b>を押すと、そのアイテム・フラグを使っているオブジェクトがまとめて選択されます。</li>
+  <li>「参照なし」のものは、どこからも使われていません（作りかけ・消し忘れの確認に）。</li>
+</ul>
+<div class="box warn"><span class="label">IDを変更したいとき</span>
+  <ol>
+    <li>一覧でIDを書き換える（例：<code>key01</code> → <code>rusty_key</code>）</li>
+    <li>タブ下部の<b>「シーン内のID参照を一括置換」</b>に、左に古いID・右に新しいIDを入れて「置換」</li>
+  </ol>
+  これでイベントや扉に設定済みのIDもまとめて書き換わります。IDだけ変えて置換を忘れると、イベント側に「⚠ 未登録」と表示されます。
+</div>
+
+<h3 id="s3-5" class="newpage">3-5　デバッグタブ（再生中のテスト）</h3>
+<figure><img src="images/m_debug.png"><figcaption>図3-3　再生中のデバッグタブ</figcaption></figure>
+<p>再生中にだけ使えるタブです。最初から遊び直さなくても、途中の状況をすぐ作れます。</p>
+<ul>
+  <li><b>フラグ</b>：チェックでその場で ON/OFF。「メモを読んだ状態」などを一瞬で作れます。</li>
+  <li><b>所持品</b>：チェックでアイテムを持たせる／取り上げる。</li>
+  <li><b>イベント</b>：各イベントの「今有効なページ」が表示されます。<b>「実行」</b>でその場から動かなくても実行できます。</li>
+  <li><b>リセット</b>：フラグ・所持品・「一度だけ実行」の記録を最初の状態に戻します。</li>
+</ul>
+<div class="box point"><span class="label">「反応しない」ときの確認手順</span>
+  <ol>
+    <li>デバッグタブでそのイベントの行を見る</li>
+    <li>「有効なページなし」→ 条件を満たすページがない（条件の設定を確認）</li>
+    <li>意図と違うページが有効 → ページの順番や条件を見直す</li>
+    <li>意図したページが有効なのに動かない → 起動方法と Collider を確認（第4章）</li>
+  </ol>
+</div>
+
+<h3 id="s3-6" class="newpage">3-6　コマンド・条件の一覧表</h3>
+<h4>コマンド</h4>
+<table>
+  <tr><th>コマンド</th><th>できること</th><th>設定項目</th></tr>
+  <tr><td>会話/メッセージ</td><td>会話ウィンドウに文章を出し、決定キーを待つ</td><td>話者（任意）、本文</td></tr>
+  <tr><td>アイテム/入手</td><td>所持品に追加し「〇〇を手に入れた。」を表示</td><td>アイテム、通知を出さない</td></tr>
+  <tr><td>アイテム/失う・使う</td><td>所持品から削除し「〇〇を使った。」を表示</td><td>アイテム、通知を出さない</td></tr>
+  <tr><td>フラグ/設定</td><td>フラグを ON／OFF にする</td><td>フラグ、値</td></tr>
+  <tr><td>ドア/開ける・閉める</td><td>扉を開閉（施錠中は開かない）</td><td>ドア</td></tr>
+  <tr><td>ドア/施錠・解錠</td><td>扉に鍵を掛ける／外す</td><td>ドア</td></tr>
+  <tr><td>演出/ジャンプスケア</td><td>ジャンプスケアを再生し、終わるまで待つ</td><td>ジャンプスケア</td></tr>
+  <tr><td>演出/効果音</td><td>音を鳴らす</td><td>効果音、終わるまで待つ</td></tr>
+  <tr><td>演出/懐中電灯を明滅</td><td>懐中電灯をちらつかせる</td><td>秒数</td></tr>
+  <tr><td>演出/フェードアウト・イン</td><td>画面を暗くする／明るくする（0秒で一瞬）</td><td>秒数</td></tr>
+  <tr><td>制御/待機</td><td>指定秒数待つ（間を作る）</td><td>秒数</td></tr>
+  <tr><td>制御/オブジェクト表示切替</td><td>物を出す・消す</td><td>対象、表示する</td></tr>
+  <tr><td>制御/イベント終了</td><td>ここで実行を打ち切る</td><td>なし</td></tr>
+</table>
+<p class="small">コマンドの左の色帯：青＝会話、黄＝アイテム、緑＝フラグ、茶＝ドア、赤＝演出、灰＝制御。</p>
+<h4>出現条件</h4>
+<table>
+  <tr><th>条件</th><th>満たすとき</th></tr>
+  <tr><td>フラグがON／フラグがOFF</td><td>指定フラグがその状態のとき</td></tr>
+  <tr><td>アイテムを所持／未所持</td><td>指定アイテムを持っている／持っていないとき</td></tr>
+</table>
+
+<!-- ============ 第4章 ============ -->
+<h2 class="chapter" id="ch4"><span class="no">第4章</span>困ったときは</h2>
+<table>
+  <tr><th style="width:32%">症状</th><th>確認すること</th></tr>
+  <tr><td><b>Q1.</b> 近づいても「[E] 調べる」が出ない</td>
+      <td><ul>
+        <li>Collider が付いているか。<b>Is Trigger がオフ</b>か（オンだと調べられない）</li>
+        <li>小さすぎないか（Collider を大きく）。距離が遠すぎないか（初期 2.2m）</li>
+        <li>有効なページの起動方法が「調べる」か、コマンドが1つ以上あるか</li>
+        <li>条件を満たしているか（デバッグタブで確認）</li>
+      </ul></td></tr>
+  <tr><td><b>Q2.</b> エリアに入っても何も起きない</td>
+      <td><ul>
+        <li>Collider の <b>Is Trigger がオン</b>か</li>
+        <li>起動方法が「エリアに入る」か、条件を満たしているか</li>
+        <li>「一度だけ実行」で、既に一度起きていないか（デバッグタブの「リセット」で戻せる）</li>
+      </ul></td></tr>
+  <tr><td><b>Q3.</b> 思ったページが実行されない</td>
+      <td>番号の大きいページが優先です（0-5）。条件なしのページを後ろに置くと、それが常に選ばれてしまいます。条件なしのページは<b>ページ1</b>に。</td></tr>
+  <tr><td><b>Q4.</b> 1つを実行したら、別のイベントまで「実行済み」になった</td>
+      <td>「一度だけ実行」の記録は<b>シーン名＋階層の位置＋オブジェクト名</b>で区別しています。同じ親の下に同じ名前のイベントがあると同一扱いになります。複製したら名前を変えてください。</td></tr>
+  <tr><td><b>Q5.</b> 画面が暗いまま戻らない</td>
+      <td>「フェードアウト」の後に「フェードイン」を入れ忘れていないか確認してください。</td></tr>
+  <tr><td><b>Q6.</b> アイテム欄に「⚠ 〇〇（未登録）」と出る</td>
+      <td>そのIDがマネージャーに登録されていません。アイテム／フラグタブの「未登録IDをすべて登録」で登録できます（2-3）。</td></tr>
+  <tr><td><b>Q7.</b> 再生を止めると「Save changes made in Play Mode」と聞かれる</td>
+      <td>Cinemachine の機能で、再生中にスクリプトが動かしたカメラの揺れや画角を保存するか聞いています。<b>Don't Keep</b> を選んでください。毎回出ないようにするには、<code>PlayerCamera (Cinemachine)</code> のインスペクター上部の「Save During Play」のチェックを外します。</td></tr>
+  <tr><td><b>Q8.</b> 暗すぎる／明るすぎる</td>
+      <td>懐中電灯：<code>Player/Flashlight</code> の Light の Intensity。霧：Lighting ウィンドウの Fog の Density。全体：<code>HorrorVolumeProfile</code> の Color Adjustments → Post Exposure。</td></tr>
+  <tr><td><b>Q9.</b> ビルドしたゲームで日本語が □ になる</td>
+      <td>画面表示はパソコンに入っている日本語フォントを使っています。配布する場合は、日本語フォント（例：Noto Sans JP）をプロジェクトに入れ、<code>[HorrorKit HUD]</code> の <b>Font</b> に指定してください。</td></tr>
+  <tr><td><b>Q10.</b> 会話中にキャラクターが動けない</td>
+      <td>仕様です。イベント実行中はプレイヤーの操作が止まります。会話を最後まで送ると動けます。</td></tr>
+</table>
+
+<div class="box point" style="margin-top:8mm"><span class="label">もっと詳しく知りたいとき</span>
+  クラスや関数の詳しい説明は <code>Assets/_Project/HorrorKit/Docs/HorrorKit_解説書.md</code> にあります。スクリプトからフラグを操作したり、新しいコマンドを追加したりする方法も載っています。
+</div>
+
+</main>
+</body>
+</html>

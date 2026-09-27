@@ -236,9 +236,11 @@ namespace HorrorKit
         public void Teleport(Vector3 position, float yaw)
         {
             controller.enabled = false;
-            transform.SetPositionAndRotation(position, Quaternion.Euler(0f, yaw, 0f));
+            // 床にめり込んで落下しないよう少し浮かせ、落下速度もリセットする
+            transform.SetPositionAndRotation(position + Vector3.up * 0.05f, Quaternion.Euler(0f, yaw, 0f));
             controller.enabled = true;
             planarVelocity = Vector3.zero;
+            verticalVelocity = 0f;
         }
 
         static float NormalizeAngle(float a)
