@@ -10,6 +10,13 @@ UserSettings/
 
 Assets/*
 !Assets/_Project/
+!Assets/_Project.meta
+# URP の描画設定（Project Settings の Graphics / Quality から参照）
+!Assets/Settings/
+!Assets/Settings.meta
+# Input System のプロジェクト全体アクション（Project Settings から参照）
+!Assets/InputSystem_Actions.inputactions
+!Assets/InputSystem_Actions.inputactions.meta
 # ===================================== #
 # Visual Studio / MonoDevelop generated #
 # ===================================== #

@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/HorrorDemo.unity
+    path: Assets/_Project/Scenes/HorrorDemo.unity
     guid: e13f87b9e71a4bd4484561695ce8c72e
   - enabled: 1
     path: Assets/Scenes/SampleScene.unity
