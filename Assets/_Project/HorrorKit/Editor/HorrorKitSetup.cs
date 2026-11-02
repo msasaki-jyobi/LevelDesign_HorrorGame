@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Unity.Cinemachine;
 using UnityEditor;
@@ -8,15 +8,31 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 
+using EventKit;
+using EventKit.EditorTools;
+
 namespace HorrorKit.EditorTools
 {
     /// <summary>雰囲気（ライティング/フォグ/ポストプロセス）、プレイヤー一式、デモシーンの自動構築。</summary>
     public static class HorrorKitSetup
     {
-        static string Root => HorrorKitEditorUtil.KitRoot;
+        /// <summary>HorrorKit フォルダの場所（このスクリプトの位置から求める）。</summary>
+        static string Root
+        {
+            get
+            {
+                foreach (var guid in AssetDatabase.FindAssets("HorrorKitSetup t:MonoScript"))
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(guid);
+                    int editor = path.LastIndexOf("/Editor/");
+                    if (path.EndsWith("/HorrorKitSetup.cs") && editor > 0) return path.Substring(0, editor);
+                }
+                return "Assets/_Project/HorrorKit";
+            }
+        }
         static string MatDir => Root + "/Demo/Materials";
         static string ProfilePath => Root + "/Settings/HorrorVolumeProfile.asset";
-        static string DemoScenePath => HorrorKitEditorUtil.ScenesFolder + "/HorrorDemo.unity";
+        static string DemoScenePath => EventKitEditorUtil.ScenesFolder + "/HorrorDemo.unity";
         const string NoiseProfilePath = "Packages/com.unity.cinemachine/Presets/Noise/Handheld_normal_mild.asset";
 
         // ───────── 雰囲気 ─────────
@@ -40,7 +56,7 @@ namespace HorrorKit.EditorTools
             RenderSettings.fogDensity = 0.085f;
             RenderSettings.fogColor = new Color(0.008f, 0.009f, 0.013f);
 
-            foreach (var l in HorrorKitEditorUtil.FindAll<Light>())
+            foreach (var l in EventKitEditorUtil.FindAll<Light>())
             {
                 if (l.type != LightType.Directional) continue;
                 Undo.RecordObject(l, "HorrorKit Atmosphere");
@@ -49,7 +65,7 @@ namespace HorrorKit.EditorTools
             }
 
             var profile = GetOrCreateProfile();
-            var volume = HorrorKitEditorUtil.FindAll<Volume>().FirstOrDefault(v => v.isGlobal);
+            var volume = EventKitEditorUtil.FindAll<Volume>().FirstOrDefault(v => v.isGlobal);
             if (volume == null)
             {
                 var go = new GameObject("Global Volume");
@@ -60,7 +76,7 @@ namespace HorrorKit.EditorTools
             Undo.RecordObject(volume, "HorrorKit Atmosphere");
             volume.sharedProfile = profile;
 
-            foreach (var cam in HorrorKitEditorUtil.FindAll<Camera>())
+            foreach (var cam in EventKitEditorUtil.FindAll<Camera>())
             {
                 Undo.RecordObject(cam, "HorrorKit Atmosphere");
                 cam.clearFlags = CameraClearFlags.SolidColor;
@@ -77,7 +93,7 @@ namespace HorrorKit.EditorTools
             var p = AssetDatabase.LoadAssetAtPath<VolumeProfile>(ProfilePath);
             if (p != null) return p;
 
-            HorrorKitEditorUtil.EnsureFolder(Root + "/Settings");
+            EventKitEditorUtil.EnsureFolder(Root + "/Settings");
             p = ScriptableObject.CreateInstance<VolumeProfile>();
             AssetDatabase.CreateAsset(p, ProfilePath);
 
@@ -135,17 +151,17 @@ namespace HorrorKit.EditorTools
 
         public static GameObject CreatePlayerRig(Vector3 position, float yaw)
         {
-            HorrorKitEditorUtil.EnsureDatabase();
+            EventKitEditorUtil.EnsureDatabase();
 
-            if (HorrorKitEditorUtil.FindAll<EventRunner>().Length == 0)
+            if (EventKitEditorUtil.FindAll<EventRunner>().Length == 0)
             {
                 var sys = new GameObject("[HorrorKit Systems]");
                 Undo.RegisterCreatedObjectUndo(sys, "Create Systems");
                 sys.AddComponent<AudioSource>().playOnAwake = false;
                 sys.AddComponent<EventRunner>();
             }
-            if (HorrorKitEditorUtil.FindAll<HorrorHUD>().Length == 0)
-                Undo.RegisterCreatedObjectUndo(new GameObject("[HorrorKit HUD]", typeof(HorrorHUD)), "Create HUD");
+            if (EventKitEditorUtil.FindAll<EventHUD>().Length == 0)
+                Undo.RegisterCreatedObjectUndo(new GameObject("[HorrorKit HUD]", typeof(EventHUD)), "Create HUD");
 
             // プレイヤー本体
             var player = new GameObject("Player");
@@ -242,7 +258,7 @@ namespace HorrorKit.EditorTools
         public static void BuildDemoScene()
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            var db = HorrorKitEditorUtil.EnsureDatabase();
+            var db = EventKitEditorUtil.EnsureDatabase();
             AddDemoData(db);
 
             // マテリアル
@@ -458,13 +474,13 @@ namespace HorrorKit.EditorTools
 
             ApplyAtmosphere();
 
-            HorrorKitEditorUtil.EnsureFolder(HorrorKitEditorUtil.ScenesFolder);
+            EventKitEditorUtil.EnsureFolder(EventKitEditorUtil.ScenesFolder);
             EditorSceneManager.SaveScene(scene, DemoScenePath);
             AddSceneToBuild(DemoScenePath);
             AssetDatabase.SaveAssets();
         }
 
-        static void AddDemoData(HorrorDatabase db)
+        static void AddDemoData(EventDatabase db)
         {
             void AddItem(string id, string name, string desc)
             {
@@ -495,7 +511,7 @@ namespace HorrorKit.EditorTools
 
         static Material Mat(string name, Color color, float smoothness, Color? emission = null)
         {
-            HorrorKitEditorUtil.EnsureFolder(MatDir);
+            EventKitEditorUtil.EnsureFolder(MatDir);
             string path = $"{MatDir}/{name}.mat";
             var m = AssetDatabase.LoadAssetAtPath<Material>(path);
             if (m == null)
@@ -574,7 +590,7 @@ namespace HorrorKit.EditorTools
             var hinge = new GameObject(name);
             hinge.transform.SetParent(parent, false);
             hinge.transform.position = hingePos;
-            HorrorKitMenus.BuildDoorVisual(hinge.transform, 1.2f, 2.2f, mat);
+            EventKitMenus.BuildDoorVisual(hinge.transform, 1.2f, 2.2f, mat);
             hinge.transform.Find("Knob").GetComponent<Renderer>().sharedMaterial = knobMat;
             var src = hinge.AddComponent<AudioSource>();
             src.playOnAwake = false;
@@ -584,9 +600,9 @@ namespace HorrorKit.EditorTools
             return door;
         }
 
-        static HorrorEvent AddEvent(GameObject go, string name, params EventPage[] pages)
+        static GameEvent AddEvent(GameObject go, string name, params EventPage[] pages)
         {
-            var ev = go.AddComponent<HorrorEvent>();
+            var ev = go.AddComponent<GameEvent>();
             ev.eventName = name;
             ev.pages = new List<EventPage>(pages);
             return ev;

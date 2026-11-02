@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ec2b42f830facb4d9eb68ab89592d2d, type: 3}
+  m_Name: EventUISettings
+  m_EditorClassIdentifier: EventKit.Runtime::EventKit.EventUISettings
+  dialogue: {fileID: 7716498875941443814, guid: a80aa24324fba8146b29f2da806baa6b, type: 3}
+  choices: {fileID: 2657680083625161427, guid: 881e5241ce861204d81d17c276d75570, type: 3}
+  prompt: {fileID: 8478945105082829139, guid: e2065dced8533b44b8b58f36842fd02e, type: 3}
+  inventory: {fileID: 6073725710437615010, guid: f41654d699e34e54b8861a7f901a0667, type: 3}
+  fade: {fileID: 584695383087105433, guid: faa22557fae3b614d802206f14d6fde6, type: 3}
+  loading: {fileID: 565662790535261365, guid: f34030a16f6a50e4e8e8b4c63b2b41d2, type: 3}
+  font: {fileID: 0}
+  osFontNames:
+  - Yu Gothic UI
+  - Meiryo UI
+  - Meiryo
+  - Hiragino Sans
+  - MS Gothic
+  - Arial
+  sortingOrder: 100
+  referenceResolution: {x: 1920, y: 1080}
+  matchWidthOrHeight: 0.5

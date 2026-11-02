@@ -1,0 +1,11 @@
+{
+    "name":  "HorrorKit.Runtime",
+    "rootNamespace":  "HorrorKit",
+    "references":  [
+                       "EventKit.Runtime",
+                       "Unity.Cinemachine",
+                       "Unity.InputSystem",
+                       "UnityEngine.UI"
+                   ],
+    "autoReferenced":  true
+}

@@ -1,37 +1,20 @@
-# HorrorKit
+# HorrorKit（EventKit 用ホラー追加パック）
 
-> 初めての人は **Docs/HorrorKit_ギミック制作ガイド.pdf**（画像付きの入門書）から読んでください。
-> クラス・関数の詳細は Docs/HorrorKit_解説書.md。PDF の元データ（HTML・画像）は Docs/Manual~/ にあります。
+一人称ホラー用の追加パック。イベント・会話・フラグ等の共通部分は **EventKit**（`Assets/_Project/EventKit`）にあります。
 
-一人称ホラー用の基本セット。Unity 6 / URP / Input System / Cinemachine 3。
+> 初めての人は **Docs/HorrorKit_ギミック制作ガイド.pdf**（画像付きの入門書。一部のメニュー名は旧名 HorrorKit のまま）。
+> クラス・関数の詳細は Docs/HorrorKit_解説書.md、移植や追加パックの作り方は EventKit/Docs のマニュアル。
 
-## メニュー
+## 中身
 
-| メニュー | 内容 |
+| 種類 | 内容 |
 |---|---|
-| HorrorKit > マネージャー (Ctrl+Shift+H) | アイテム・フラグ・イベント・会話テキストの一括管理、再生中のデバッグ |
-| HorrorKit > イベントエディタ (Ctrl+Shift+E) | RPGツクール風のイベント編集（ページ・出現条件・実行内容の挿入／並び替え／条件分岐／選択肢） |
-| HorrorKit > セットアップ > ライティング・フォグ・ポストプロセスを適用 | 現在のシーンを暗い雰囲気にする |
-| HorrorKit > セットアップ > プレイヤー一式を配置 | Player / Cinemachineカメラ / 懐中電灯 / HUD / EventRunner |
-| HorrorKit > セットアップ > デモシーンを新規作成 | `Assets/_Project/Scenes/HorrorDemo.unity` を作り直す |
-| Hierarchy 右クリック > HorrorKit | 調べるイベント / エリアイベント / 振り返り会話イベント / ドア / 引き戸 / ジャンプスケア / ちらつくライト |
+| プレイヤー | FirstPersonController（IEventPlayer 実装）、Flashlight、HorrorInput（視点・ダッシュ・しゃがみ・懐中電灯） |
+| 演出 | JumpScare（IEventPerformance 実装）、FlickerLight |
+| 拡張コマンド | ホラー/懐中電灯の明滅・ON/OFF・電池を補充 |
+| セットアップ | HorrorKit > セットアップ（ライティング・フォグ・ポストプロセス／プレイヤー一式／デモシーン） |
+| Hierarchy | 右クリック > HorrorKit > ジャンプスケア／ちらつくライト |
 
 ## 操作
 
 WASD 移動 / マウス 視点 / E・左クリック 調べる・会話送り / F 懐中電灯 / Shift 走る / C しゃがむ / Tab 所持品
-
-## イベント (HorrorEvent)
-
-- ページ制：番号の大きいページから条件判定し、最初に条件を満たしたページが有効になる。
-- 起動方法：調べる（通常のColliderが必要）/ エリアに入る（Is Trigger の Collider）/ 自動実行。
-- 出現条件：フラグ ON/OFF、アイテム所持/未所持（すべて満たすと有効）。
-- 「一度だけ実行」したページは以後スキップされ、下のページに移る。
-- コマンド：会話、選択肢、条件分岐、イベント呼び出し、アイテム入手/使用、フラグ設定、ドア開閉・施錠・解錠、ジャンプスケア、効果音、懐中電灯明滅、フェード、待機、終了、
-  視点変更（カメラ操作ウィンドウ・プレビュー付き）/視点変更解除/カメラシェイク、オブジェクトのアクティブ・非アクティブ/移動/回転/スケール変更、UnityEventの実行。
-
-実行済み判定はシーン名＋階層パスで記録するため、同じ階層に同名のイベントを置かないこと。
-
-## データ
-
-キーアイテムとフラグは `Assets/_Project/HorrorKit/Resources/HorrorDatabase.asset` に定義する（マネージャーから編集）。
-ID を変えたときはマネージャー下部の「一括置換」でシーン内の参照も直せる。

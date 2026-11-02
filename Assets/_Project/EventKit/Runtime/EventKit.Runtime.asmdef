@@ -1,0 +1,10 @@
+{
+    "name":  "EventKit.Runtime",
+    "rootNamespace":  "EventKit",
+    "references":  [
+                       "Unity.Cinemachine",
+                       "Unity.InputSystem",
+                       "UnityEngine.UI"
+                   ],
+    "autoReferenced":  true
+}

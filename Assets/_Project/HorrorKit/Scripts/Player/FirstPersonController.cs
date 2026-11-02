@@ -1,6 +1,8 @@
-using System.Collections;
+﻿using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
+
+using EventKit;
 
 namespace HorrorKit
 {
@@ -9,7 +11,7 @@ namespace HorrorKit
     /// 本体でヨー、cameraRoot でピッチを回し、Cinemachine カメラが cameraRoot を追従する。
     /// </summary>
     [RequireComponent(typeof(CharacterController))]
-    public class FirstPersonController : MonoBehaviour
+    public class FirstPersonController : MonoBehaviour, IEventPlayer
     {
         public static FirstPersonController Instance { get; private set; }
 
@@ -63,6 +65,7 @@ namespace HorrorKit
         void Awake()
         {
             Instance = this;
+            EventPlayer.Register(this);
             controller = GetComponent<CharacterController>();
             HorrorInput.Ensure();
             currentHeight = standHeight;
@@ -78,6 +81,7 @@ namespace HorrorKit
         void OnDestroy()
         {
             if (Instance == this) Instance = null;
+            EventPlayer.Unregister(this);
         }
 
         void OnEnable() => SetCursorLocked(true);
@@ -140,7 +144,7 @@ namespace HorrorKit
 
         void Move(bool locked, float dt)
         {
-            Vector2 input = locked ? Vector2.zero : Vector2.ClampMagnitude(HorrorInput.Move.ReadValue<Vector2>(), 1f);
+            Vector2 input = locked ? Vector2.zero : Vector2.ClampMagnitude(EventInput.Move.ReadValue<Vector2>(), 1f);
             IsSprinting = !locked && !crouching && input.y > 0.1f && HorrorInput.Sprint.IsPressed();
             float speed = crouching ? crouchSpeed : IsSprinting ? sprintSpeed : walkSpeed;
 
@@ -189,6 +193,12 @@ namespace HorrorKit
         }
 
         /// <summary>対象の方向へ強制的に視点を向ける（ジャンプスケア等）。holdTime の間は追い続ける。</summary>
+        // ───────── IEventPlayer（イベントから操作される窓口） ─────────
+
+        Transform IEventPlayer.PlayerTransform => transform;
+
+        IEnumerator IEventPlayer.LookAt(Transform target, float blendTime, float holdTime) => LookAtRoutine(target, blendTime, holdTime);
+
         public IEnumerator LookAtRoutine(Transform target, float blendTime, float holdTime)
         {
             if (target == null) yield break;

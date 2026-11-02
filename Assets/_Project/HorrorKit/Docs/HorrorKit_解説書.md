@@ -1,5 +1,11 @@
 # HorrorKit 解説書
 
+> **構成の変更（EventKit への分離）**
+> イベント・イベントエディタ・フラグ/アイテム・会話UI・ドア・シーン遷移などの共通部分は `Assets/_Project/EventKit`（汎用パック）に移りました。
+> HorrorKit は一人称操作・懐中電灯・ジャンプスケアなどの「ホラー用追加パック」です。
+> クラス名の変更：HorrorEvent → **GameEvent**、HorrorDatabase → **EventDatabase**、HorrorHUD → **EventHUD**（見た目は「EventKit > UIプレハブ管理」で差し替え）。
+> 移植・UIの差し替え・追加パックの作り方は **EventKit/Docs/EventKit_マニュアル（移植・追加パック制作）.pdf** を参照。
+
 Unity 6 / URP / Input System / Cinemachine 3 向けの一人称ホラー基盤。
 この文書は「3Dオブジェクトを HorrorKit の要素にする方法」「各クラスの役割」「関数リファレンス」をまとめたもの。
 
@@ -26,13 +32,13 @@ Unity 6 / URP / Input System / Cinemachine 3 向けの一人称ホラー基盤�
                              │
    ┌─────────────────────────┼──────────────────────────┐
    ▼                         ▼                          ▼
-FirstPersonController   PlayerInteractor            Flashlight / HorrorHUD
+FirstPersonController   PlayerInteractor            Flashlight / EventHUD
  移動・視点・しゃがみ     視線レイで IInteractable を探す   懐中電灯 / 所持品(Tab)
  Cinemachineの揺れ          │
                              │ Interact()
                ┌─────────────┴──────────────┐
                ▼                            ▼
-          HorrorEvent                     Door
+          GameEvent                     Door
    ページ判定（条件: GameState）         開閉・施錠・鍵
                │ Run()
                ▼
@@ -40,16 +46,16 @@ FirstPersonController   PlayerInteractor            Flashlight / HorrorHUD
                │                             │
      ┌─────────┼──────────┬──────────┬───────┴──────┐
      ▼         ▼          ▼          ▼              ▼
- HorrorHUD   GameState   Door     JumpScare     Flashlight
+ EventHUD   GameState   Door     JumpScare     Flashlight
  会話・フェード フラグ/所持品 開閉    演出          明滅
 
- HorrorDatabase (Resources) … アイテム・フラグの「定義」
+ EventDatabase (Resources) … アイテム・フラグの「定義」
  GameState (static)          … 実行中の「状態」（フラグ値・所持品・実行済みページ）
 ```
 
-- **定義と状態を分けている。** `HorrorDatabase` はアセット（編集時のデータ）、`GameState` は実行中の値。再生を止めると `GameState` は初期化される。
+- **定義と状態を分けている。** `EventDatabase` はアセット（編集時のデータ）、`GameState` は実行中の値。再生を止めると `GameState` は初期化される。
 - **イベントは同時に1つだけ実行される。** 実行中は `InputLock` によりプレイヤー操作が止まる。
-- **調べられるもの**はすべて `IInteractable` を実装している（`HorrorEvent` と `Door`）。
+- **調べられるもの**はすべて `IInteractable` を実装している（`GameEvent` と `Door`）。
 
 ---
 
@@ -71,14 +77,14 @@ HorrorKit の要素は「ただの GameObject + コンポーネント」なの�
 
 1. モデルをシーンに置く（FBX をドラッグ等）。
 2. Collider が無ければ追加する（`BoxCollider` 推奨。複雑な形なら `MeshCollider`）。
-3. **Add Component → HorrorEvent**（またはインスペクターに出る警告ボタンで Collider 追加）。
+3. **Add Component → GameEvent**（またはインスペクターに出る警告ボタンで Collider 追加）。
 4. ページ1の「起動方法」を **調べる** にし、実行内容にコマンドを並べる。
 
-> モデルが複数パーツの親子構造なら、**親**に `HorrorEvent` を付け、Collider はどのパーツに付いていても良い。
+> モデルが複数パーツの親子構造なら、**親**に `GameEvent` を付け、Collider はどのパーツに付いていても良い。
 
 ### 2-3. 拾えるアイテム（鍵・メモ・写真など）
 
-`HorrorEvent` 1つで作れる：
+`GameEvent` 1つで作れる：
 
 | 設定 | 値 |
 |---|---|
@@ -89,7 +95,7 @@ HorrorKit の要素は「ただの GameObject + コンポーネント」なの�
 
 アイテムIDは先に **マネージャー → アイテム** で登録しておく（表示名・説明文が所持品画面に出る）。
 
-> 「棚の奥にある鍵」のように、**調べる対象（棚）と見た目（鍵）が別**の場合は、棚に `HorrorEvent` を付け、表示切替の対象を鍵モデルにする（デモの「廊下の棚」がこの形）。
+> 「棚の奥にある鍵」のように、**調べる対象（棚）と見た目（鍵）が別**の場合は、棚に `GameEvent` を付け、表示切替の対象を鍵モデルにする（デモの「廊下の棚」がこの形）。
 
 ### 2-4. 自作モデルのドア
 
@@ -212,7 +218,7 @@ JumpScare_XXX       ← JumpScare + CinemachineImpulseSource
 
 ### 2-8. プレハブ化するときの注意
 
-- `HorrorEvent` のコマンドが **シーン内の別オブジェクト**（Door / JumpScare / 表示切替対象）を参照している場合、その参照は**同じプレハブ内**に収まっていないと失われる。
+- `GameEvent` のコマンドが **シーン内の別オブジェクト**（Door / JumpScare / 表示切替対象）を参照している場合、その参照は**同じプレハブ内**に収まっていないと失われる。
 - 「拾えるアイテム」（自分自身を消すだけ）や「調べるだけのオブジェクト」はそのままプレハブ化できる。
 - プレハブを複数置くときは **オブジェクト名を変える**（→ 3-4 の「実行済み」判定参照）。
 
@@ -238,15 +244,15 @@ JumpScare_XXX       ← JumpScare + CinemachineImpulseSource
 
 ### 3-1. データ・状態（Scripts/Core）
 
-#### `HorrorDatabase`（ScriptableObject）
-キーアイテムとフラグの **定義** を持つアセット。`Assets/_Project/HorrorKit/Resources/HorrorDatabase.asset` に置き、実行時は `Resources.Load` で自動取得される。編集はマネージャーから行う。
+#### `EventDatabase`（ScriptableObject）
+キーアイテムとフラグの **定義** を持つアセット。`Assets/_Project/EventKit/Resources/EventDatabase.asset` に置き、実行時は `Resources.Load` で自動取得される。編集はマネージャーから行う。
 
 - `ItemDefinition`：`id` / `displayName`（表示名）/ `description`（所持品画面の説明）/ `icon`
 - `FlagDefinition`：`id` / `description`（メモ）/ `defaultValue`（初期値）
 
 #### `GameState`（static クラス）
 実行中の **状態**。フラグの現在値、所持品、実行済みイベントページを保持する。
-再生開始時に自動リセットされ、`HorrorDatabase` のフラグ初期値が入る。値が変わると `Changed` イベントが飛ぶ（自動実行イベントや所持品画面の更新に使われる）。
+再生開始時に自動リセットされ、`EventDatabase` のフラグ初期値が入る。値が変わると `Changed` イベントが飛ぶ（自動実行イベントや所持品画面の更新に使われる）。
 
 #### `HorrorInput`（static クラス）
 Input System のアクションを **コードで定義** している（.inputactions アセット不要）。キー割り当てを変えたい場合はこのファイルの `Ensure()` を編集する。
@@ -266,7 +272,7 @@ Input System のアクションを **コードで定義** している（.inputa
 プレイヤー操作を止めるカウンタ。イベント実行中や所持品画面表示中に `Push()`、終わったら `Pop()`。カウンタ方式なので複数の要因が重なっても正しく戻る。
 
 #### `IInteractable`（interface）
-「調べられるもの」の共通窓口。`HorrorEvent` と `Door` が実装している。自作の仕掛け（スイッチ等）もこれを実装すれば `PlayerInteractor` から調べられる（→ 5章）。
+「調べられるもの」の共通窓口。`GameEvent` と `Door` が実装している。自作の仕掛け（スイッチ等）もこれを実装すれば `PlayerInteractor` から調べられる（→ 5章）。
 
 #### `ItemIdAttribute` / `FlagIdAttribute`
 `string` フィールドに付けると、インスペクターで **データベースのIDをドロップダウン選択** できるようになる。
@@ -278,7 +284,7 @@ Input System のアクションを **コードで定義** している（.inputa
 
 ### 3-2. イベント（Scripts/Events）
 
-#### `HorrorEvent`（MonoBehaviour, IInteractable）
+#### `GameEvent`（MonoBehaviour, IInteractable）
 会話・アイテム・フラグ・演出をまとめる中心コンポーネント。**ページ** のリストを持つ。
 
 **ページ選択ルール**
@@ -367,7 +373,7 @@ Perlin ノイズで光を揺らし、`blackoutChance`（1秒あたりの確率�
 
 ### 3-5. UI（Scripts/UI）
 
-#### `HorrorHUD`（MonoBehaviour, シングルトン）
+#### `EventHUD`（MonoBehaviour, シングルトン）
 UIを **実行時にコードで生成** する（プレハブ不要）。
 
 | 要素 | 内容 |
@@ -384,14 +390,14 @@ UIを **実行時にコードで生成** する（プレハブ不要）。
 
 | クラス | 役割 |
 |---|---|
-| `HorrorKitWindow` | マネージャーウィンドウ（アイテム / フラグ / イベント / 会話テキスト / デバッグ） |
-| `HorrorEventEditor` | `HorrorEvent` のインスペクター（ページタブ、ページ操作、Collider警告） |
+| `EventKitWindow` | マネージャーウィンドウ（アイテム / フラグ / イベント / 会話テキスト / デバッグ） |
+| `GameEventEditor` | `GameEvent` のインスペクター（ページタブ、ページ操作、Collider警告） |
 | `EventCommandDrawer` | コマンドをタイプ別に描画（色帯付き） |
 | `EventConditionDrawer` | 条件を1行で描画（IDはドロップダウン） |
 | `ItemIdDrawer` / `FlagIdDrawer` | `[ItemId]` / `[FlagId]` のドロップダウン |
 | `HorrorKitMenus` | Hierarchy 右クリック → HorrorKit の生成メニュー |
 | `HorrorKitSetup` | 雰囲気適用・プレイヤー配置・デモシーン生成 |
-| `HorrorKitEditorUtil` | 共通処理（DB取得、ID選択UI、参照検索、ID一括置換、要約文生成） |
+| `EventKitEditorUtil` | 共通処理（DB取得、ID選択UI、参照検索、ID一括置換、要約文生成） |
 
 ---
 
@@ -416,11 +422,11 @@ UIを **実行時にコードで生成** する（プレハブ不要）。
 | `event Action Changed` | 状態が変わったとき |
 | `event Action<string> ItemAdded` | アイテム入手時（引数はID） |
 
-### HorrorDatabase
+### EventDatabase
 
 | 関数 / プロパティ | 説明 |
 |---|---|
-| `static HorrorDatabase Instance` | Resources から読み込んだデータベース |
+| `static EventDatabase Instance` | Resources から読み込んだデータベース |
 | `ItemDefinition GetItem(string id)` | アイテム定義を取得（無ければ null） |
 | `FlagDefinition GetFlag(string id)` | フラグ定義を取得 |
 | `static string ItemName(string id)` | 表示名を取得（未定義ならIDを返す） |
@@ -434,7 +440,7 @@ UIを **実行時にコードで生成** する（プレハブ不要）。
 | `InputLock.IsLocked` | 操作ロック中か |
 | `InputLock.Push()` / `Pop()` | ロックを1段かける / 外す |
 
-### HorrorEvent
+### GameEvent
 
 | 関数 / プロパティ | 説明 |
 |---|---|
@@ -465,7 +471,7 @@ UIを **実行時にコードで生成** する（プレハブ不要）。
 | `static EventRunner Instance` | 実行器（無ければ自動生成） |
 | `static bool IsBusy` | イベント実行中か |
 | `static int LastEndFrame` | 最後にイベントが終わったフレーム（決定キーの二重入力防止） |
-| `void Run(HorrorEvent ev, int pageIndex)` | 指定ページを実行（必要なら実行済みとして記録） |
+| `void Run(GameEvent ev, int pageIndex)` | 指定ページを実行（必要なら実行済みとして記録） |
 | `void RunCommands(IList<EventCommand> commands)` | 任意のコマンド列を実行 |
 | `void ShowMessages(params string[] lines)` | メッセージだけの簡易イベント |
 
@@ -512,11 +518,11 @@ UIを **実行時にコードで生成** する（プレハブ不要）。
 | `void Trigger()` | 演出を開始（投げっぱなし） |
 | `IEnumerator Play()` | 演出本体。終わるまで待ちたいときは `yield return` で使う |
 
-### HorrorHUD
+### EventHUD
 
 | 関数 / プロパティ | 説明 |
 |---|---|
-| `static HorrorHUD Instance` | 現在のHUD |
+| `static EventHUD Instance` | 現在のHUD |
 | `IEnumerator ShowMessage(string speaker, string text)` | 文字送り表示し、決定入力まで待つ |
 | `void RequestAdvance()` | 会話を1つ送る（UIボタン・タッチ操作用） |
 | `void HideDialogue()` | 会話ウィンドウを閉じる |
@@ -525,16 +531,16 @@ UIを **実行時にコードで生成** する（プレハブ不要）。
 | `void ToggleInventory()` | 所持品画面の開閉 |
 | `bool IsDialogueOpen` / `bool IsInventoryOpen` | 表示状態 |
 
-### エディタ用（HorrorKitEditorUtil ほか）
+### エディタ用（EventKitEditorUtil ほか）
 
 | 関数 | 説明 |
 |---|---|
-| `HorrorKitEditorUtil.Database` | データベースアセット |
-| `HorrorKitEditorUtil.EnsureDatabase()` | 無ければ作成 |
-| `HorrorKitEditorUtil.IdPopup(...)` | ID選択ドロップダウン（自作エディタでも使える） |
-| `HorrorKitEditorUtil.CollectReferences(bool items)` | シーン内のID参照を収集 |
-| `HorrorKitEditorUtil.ReplaceIdInScene(from, to, items)` | シーン内のID参照を一括置換（Undo対応） |
-| `HorrorKitEditorUtil.PageSummary(EventPage)` | ページの1行要約 |
+| `EventKitEditorUtil.Database` | データベースアセット |
+| `EventKitEditorUtil.EnsureDatabase()` | 無ければ作成 |
+| `EventKitEditorUtil.IdPopup(...)` | ID選択ドロップダウン（自作エディタでも使える） |
+| `EventKitEditorUtil.CollectReferences(bool items)` | シーン内のID参照を収集 |
+| `EventKitEditorUtil.ReplaceIdInScene(from, to, items)` | シーン内のID参照を一括置換（Undo対応） |
+| `EventKitEditorUtil.PageSummary(EventPage)` | ページの1行要約 |
 | `HorrorKitMenus.CreateInteractEvent(cmd)` / `CreateAreaEvent(cmd)` | イベントの生成 |
 | `HorrorKitSetup.ApplyAtmosphere()` | 雰囲気設定を現在のシーンに適用 |
 | `HorrorKitSetup.CreatePlayerRig(pos, yaw)` | プレイヤー一式を生成 |
@@ -606,7 +612,7 @@ void OnTriggerEnter(Collider other)
 }
 ```
 
-（通常は HorrorEvent のエリアイベントで十分）
+（通常は GameEvent のエリアイベントで十分）
 
 ---
 
@@ -624,7 +630,7 @@ void OnTriggerEnter(Collider other)
        if (Flashlight.Instance != null) Flashlight.Instance.AddBattery(c.duration);
        break;
    ```
-3. **`HorrorKitDrawers.cs`** の `EventCommandDrawer` に表示を追加
+3. **`EventKitDrawers.cs`** の `EventCommandDrawer` に表示を追加
    - `ExtraLines()` に行数（この例では 1）
    - `OnGUI()` の switch に `duration` を「回復量」として描画する case
 
@@ -641,14 +647,14 @@ Assets/_Project/
 ├ Scenes/HorrorDemo.unity   デモシーン
 └ HorrorKit/
    ├ Scripts/
-   │ ├ Core/     HorrorDatabase.cs, GameState.cs, HorrorInput.cs（InputLock / IInteractable / 属性も同梱）
-   │ ├ Events/   EventData.cs, HorrorEvent.cs, EventRunner.cs
+   │ ├ Core/     EventDatabase.cs, GameState.cs, HorrorInput.cs（InputLock / IInteractable / 属性も同梱）
+   │ ├ Events/   EventData.cs, GameEvent.cs, EventRunner.cs
    │ ├ Player/   FirstPersonController.cs, PlayerInteractor.cs, Flashlight.cs
    │ ├ World/    Door.cs, JumpScare.cs, FlickerLight.cs
-   │ └ UI/       HorrorHUD.cs
-   ├ Editor/     HorrorKitWindow.cs, HorrorEventEditor.cs, HorrorKitDrawers.cs,
-   │             HorrorKitMenus.cs, HorrorKitSetup.cs, HorrorKitEditorUtil.cs
-   ├ Resources/  HorrorDatabase.asset
+   │ └ UI/       EventHUD.cs
+   ├ Editor/     EventKitWindow.cs, GameEventEditor.cs, EventKitDrawers.cs,
+   │             HorrorKitMenus.cs, HorrorKitSetup.cs, EventKitEditorUtil.cs
+   ├ Resources/  EventDatabase.asset
    ├ Settings/   HorrorVolumeProfile.asset（ポストプロセス）
    ├ Demo/Materials/
    ├ Docs/       この解説書

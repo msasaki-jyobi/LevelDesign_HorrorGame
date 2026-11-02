@@ -1,0 +1,209 @@
+﻿using System.Collections.Generic;
+using UnityEngine;
+
+namespace EventKit
+{
+    /// <summary>
+    /// 調べる・エリア侵入・自動実行で動くイベント。
+    /// ページは番号の大きいものから条件を判定し、最初に条件を満たしたページが有効になる。
+    /// 会話・アイテム入手・フラグ操作・ドア・ジャンプスケアをコマンドとして並べて実行する。
+    /// </summary>
+    [DisallowMultipleComponent]
+    public class GameEvent : MonoBehaviour, IInteractable
+    {
+        [Tooltip("マネージャーに表示される名前")]
+        public string eventName;
+        public List<EventPage> pages = new List<EventPage> { new EventPage() };
+
+        [System.NonSerialized] string cachedPath;
+        [System.NonSerialized] bool pendingAuto;
+        [System.NonSerialized] bool pendingEnter;
+
+        public string PageKey(int index)
+        {
+            if (string.IsNullOrEmpty(cachedPath)) cachedPath = BuildPath();
+            return cachedPath + "#" + index;
+        }
+
+        string BuildPath()
+        {
+            var t = transform;
+            var path = t.name;
+            while (t.parent != null)
+            {
+                t = t.parent;
+                path = t.name + "/" + path;
+            }
+            return gameObject.scene.name + ":" + path;
+        }
+
+        public string DisplayName => string.IsNullOrEmpty(eventName) ? name : eventName;
+
+        /// <summary>現在有効なページ番号（0始まり）。無ければ -1。</summary>
+        public int ActivePageIndex
+        {
+            get
+            {
+                for (int i = pages.Count - 1; i >= 0; i--)
+                {
+                    var p = pages[i];
+                    if (p == null || !p.ConditionsMet()) continue;
+                    bool once = p.runOnce || p.trigger == EventTrigger.AutoStart;
+                    if (once && Application.isPlaying && GameState.IsPageFinished(PageKey(i))) continue;
+                    return i;
+                }
+                return -1;
+            }
+        }
+
+        public EventPage ActivePage
+        {
+            get
+            {
+                int i = ActivePageIndex;
+                return i >= 0 ? pages[i] : null;
+            }
+        }
+
+        public string InteractPrompt
+        {
+            get
+            {
+                var p = ActivePage;
+                return p == null ? null : string.IsNullOrEmpty(p.prompt) ? "調べる" : p.prompt;
+            }
+        }
+
+        public bool CanInteract
+        {
+            get
+            {
+                var p = ActivePage;
+                return p != null && p.trigger == EventTrigger.Interact && p.commands.Count > 0 && !EventRunner.IsBusy;
+            }
+        }
+
+        public void Interact(PlayerInteractor interactor) => RunIfTrigger(EventTrigger.Interact);
+
+        /// <summary>有効ページを強制実行する（デバッグ・外部スクリプト用）。</summary>
+        public void RunActivePage()
+        {
+            int i = ActivePageIndex;
+            if (i >= 0) EventRunner.Instance.Run(this, i);
+        }
+
+        bool RunIfTrigger(EventTrigger trigger)
+        {
+            if (EventRunner.IsBusy) return false;
+            int i = ActivePageIndex;
+            if (i < 0 || pages[i].trigger != trigger) return false;
+            EventRunner.Instance.Run(this, i);
+            return true;
+        }
+
+        void Start()
+        {
+            GameState.Changed += OnStateChanged;
+            pendingAuto = true;
+        }
+
+        void OnDestroy() => GameState.Changed -= OnStateChanged;
+
+        void OnStateChanged() => pendingAuto = true;
+
+        void Update()
+        {
+            if (EventRunner.IsBusy) return;
+            if (pendingAuto)
+            {
+                pendingAuto = false;
+                RunIfTrigger(EventTrigger.AutoStart);
+            }
+            if (pendingEnter)
+            {
+                pendingEnter = false;
+                RunIfTrigger(EventTrigger.EnterArea);
+            }
+        }
+
+        void OnTriggerEnter(Collider other)
+        {
+            if (EventPlayer.IsPlayer(other)) pendingEnter = true;
+        }
+
+#if UNITY_EDITOR
+        void OnDrawGizmos()
+        {
+            bool area = false;
+            foreach (var p in pages)
+                if (p != null && p.trigger == EventTrigger.EnterArea) area = true;
+            var col = GetComponent<BoxCollider>();
+            Gizmos.color = area ? new Color(1f, 0.55f, 0.1f, 0.6f) : new Color(0.3f, 0.9f, 1f, 0.6f);
+            if (col != null)
+            {
+                Gizmos.matrix = transform.localToWorldMatrix;
+                Gizmos.DrawWireCube(col.center, col.size);
+                if (area)
+                {
+                    Gizmos.color = new Color(1f, 0.55f, 0.1f, 0.08f);
+                    Gizmos.DrawCube(col.center, col.size);
+                    Gizmos.color = new Color(1f, 0.55f, 0.1f, 0.6f);
+                }
+                Gizmos.matrix = Matrix4x4.identity;
+            }
+            // ラベルは Collider 全体の上に出す（親が原点にあり子に形状がある場合でも正しい位置になる）
+            Vector3 labelPos = transform.position + Vector3.up * 0.3f;
+            var colliders = GetComponentsInChildren<Collider>(true);
+            if (colliders.Length > 0)
+            {
+                var bounds = colliders[0].bounds;
+                foreach (var c in colliders) bounds.Encapsulate(c.bounds);
+                labelPos = bounds.center + Vector3.up * (bounds.extents.y + 0.15f);
+            }
+            var style = new GUIStyle(UnityEditor.EditorStyles.miniBoldLabel) { normal = { textColor = Gizmos.color } };
+            UnityEditor.Handles.Label(labelPos, "◆ " + DisplayName, style);
+
+            // 振り向く先・音を鳴らす場所を線で示す
+            var lineColor = new Color(0.75f, 0.45f, 1f, 0.9f);
+            foreach (var p in pages)
+            {
+                if (p == null) continue;
+                foreach (var c in p.commands)
+                {
+                    if (c == null || c.target == null) continue;
+                    if (c.type != CommandType.Message && c.type != CommandType.LookAt && c.type != CommandType.PlaySound && c.type != CommandType.Warp) continue;
+                    var to = c.target.transform.position;
+                    Gizmos.color = lineColor;
+                    Gizmos.DrawLine(labelPos, to);
+                    Gizmos.DrawWireSphere(to, 0.15f);
+                    var s = new GUIStyle(UnityEditor.EditorStyles.miniLabel) { normal = { textColor = lineColor } };
+                    string mark = c.type == CommandType.PlaySound ? "♪ 音" : c.type == CommandType.Warp ? "⇢ ワープ先" : "◎ 振り向く先";
+                    UnityEditor.Handles.Label(to + Vector3.up * 0.25f, mark, s);
+                }
+            }
+        }
+
+        // 選択中は「視点変更」のカメラ位置を枠で示す
+        void OnDrawGizmosSelected()
+        {
+            var camColor = new Color(1f, 0.85f, 0.2f, 0.9f);
+            int n = 0;
+            foreach (var p in pages)
+            {
+                if (p == null) continue;
+                foreach (var c in p.commands)
+                {
+                    if (c == null || c.type != CommandType.CameraView) continue;
+                    n++;
+                    Gizmos.color = camColor;
+                    Gizmos.matrix = Matrix4x4.TRS(c.viewPosition, Quaternion.Euler(c.viewRotation), Vector3.one);
+                    Gizmos.DrawFrustum(Vector3.zero, c.viewFov > 0f ? c.viewFov : 60f, 1.2f, 0.05f, 16f / 9f);
+                    Gizmos.matrix = Matrix4x4.identity;
+                    var s = new GUIStyle(UnityEditor.EditorStyles.miniBoldLabel) { normal = { textColor = camColor } };
+                    UnityEditor.Handles.Label(c.viewPosition + Vector3.up * 0.2f, $"▣ 視点{n}", s);
+                }
+            }
+        }
+#endif
+    }
+}

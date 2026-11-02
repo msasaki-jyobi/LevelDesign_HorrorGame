@@ -1,14 +1,16 @@
-using System.Collections;
+﻿using System.Collections;
 using Unity.Cinemachine;
 using UnityEngine;
+
+using EventKit;
 
 namespace HorrorKit
 {
     /// <summary>
-    /// ジャンプスケア演出。イベントの「演出/ジャンプスケア」コマンドから呼ぶか、Trigger() を直接呼ぶ。
+    /// ジャンプスケア演出。イベントの「演出オブジェクトを再生」コマンドから呼ぶか、Trigger() を直接呼ぶ。
     /// 出現 → 突進 → 強制注視 → 画面揺れ(Impulse) → 画角キック → 懐中電灯明滅 をまとめて行う。
     /// </summary>
-    public class JumpScare : MonoBehaviour
+    public class JumpScare : MonoBehaviour, IEventPerformance
     {
         [Header("出現するもの")]
         [Tooltip("演出中だけ表示されるオブジェクト（非アクティブにしておく）")]

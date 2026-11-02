@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>EventKit マニュアル</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 16mm 15mm; }
+  :root { --ink:#1d1f24; --sub:#5b6170; --line:#d9dce3; --accent:#b0302a; --accent2:#2a5fb0; --bg:#f6f7f9; --code:#f1f3f6; }
+  * { box-sizing: border-box; }
+  body { font-family: "Yu Gothic UI","Meiryo","Hiragino Sans",sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.7; margin: 0; }
+  h1 { font-size: 26pt; margin: 0 0 6px; letter-spacing: .02em; }
+  h2 { font-size: 16pt; border-bottom: 3px solid var(--accent); padding-bottom: 4px; margin: 0 0 12px; page-break-after: avoid; }
+  h3 { font-size: 12.5pt; margin: 18px 0 6px; padding-left: 8px; border-left: 4px solid var(--accent2); page-break-after: avoid; }
+  h4 { font-size: 11pt; margin: 12px 0 4px; page-break-after: avoid; }
+  p { margin: 6px 0; }
+  section { page-break-before: always; }
+  .cover { height: 250mm; display: flex; flex-direction: column; justify-content: center; }
+  .cover .sub { font-size: 13pt; color: var(--sub); }
+  .cover .box { margin-top: 28px; padding: 16px 18px; background: var(--bg); border-radius: 8px; }
+  table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 9.5pt; page-break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: 5px 7px; vertical-align: top; text-align: left; }
+  th { background: var(--bg); white-space: nowrap; }
+  code { font-family: Consolas, "MS Gothic", monospace; background: var(--code); padding: 0 3px; border-radius: 3px; font-size: 9.5pt; }
+  pre { font-family: Consolas, "MS Gothic", monospace; background: #22252b; color: #e8e8e8; padding: 10px 12px; border-radius: 6px; font-size: 8.8pt; line-height: 1.5; white-space: pre-wrap; margin: 8px 0; }
+  pre .c { color: #8fbf7f; }
+  pre .k { color: #7fb4ff; }
+  pre .s { color: #e8b77f; }
+  .note { background: #fff6e5; border-left: 4px solid #e0a020; padding: 8px 10px; margin: 8px 0; border-radius: 4px; page-break-inside: avoid; }
+  .tip { background: #eaf3ff; border-left: 4px solid var(--accent2); padding: 8px 10px; margin: 8px 0; border-radius: 4px; page-break-inside: avoid; }
+  .steps { counter-reset: s; list-style: none; padding-left: 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 34px; margin: 8px 0; page-break-inside: avoid; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 1px; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: bold; text-align: center; line-height: 24px; font-size: 10pt; }
+  figure { margin: 10px 0; text-align: center; page-break-inside: avoid; }
+  figure img { max-width: 100%; border: 1px solid var(--line); border-radius: 4px; }
+  figure.half img { max-width: 62%; }
+  figcaption { font-size: 9pt; color: var(--sub); margin-top: 4px; }
+  .diagram { display: flex; gap: 10px; align-items: stretch; margin: 10px 0; page-break-inside: avoid; }
+  .diagram .blk { flex: 1; border: 2px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 9.5pt; }
+  .diagram .core { border-color: var(--accent2); background: #f2f7ff; }
+  .diagram .addon { border-color: var(--accent); background: #fff4f3; }
+  .diagram .game { border-color: #3a8a4a; background: #f1faf2; }
+  .diagram b { display: block; margin-bottom: 4px; font-size: 10.5pt; }
+  .toc ol { padding-left: 20px; }
+  .toc li { margin: 3px 0; }
+  .two { display: flex; gap: 14px; }
+  table.compact { font-size: 8.8pt; }
+  table.compact th, table.compact td { padding: 2px 6px; }
+  .two > div { flex: 1; }
+  .small { font-size: 9pt; color: var(--sub); }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="small">Unity 6 / Input System / Cinemachine 3 / uGUI</div>
+  <h1>EventKit マニュアル</h1>
+  <div class="sub">RPGツクール風イベントシステムの移植と、追加パックの作り方</div>
+  <div class="box">
+    <p><b>EventKit</b> は、イベント（会話・選択肢・条件分岐・フラグ・アイテム・カメラ演出・シーン遷移…）を<br>
+    イベントエディタで「上から順に並べて」作れる仕組みです。ジャンルに依存しないので、ホラー以外（アクション・アドベンチャー等）にもそのまま持っていけます。</p>
+    <p><b>HorrorKit</b> は EventKit の上に載った「ホラー用の追加パック」です（一人称操作・懐中電灯・ジャンプスケア）。<br>
+    自分のゲーム用の追加パックも、同じやり方で作れます。</p>
+  </div>
+  <div class="toc" style="margin-top:24px">
+    <b>目次</b>
+    <ol>
+      <li>全体の構成</li>
+      <li>別のプロジェクトへ移す</li>
+      <li>プレイヤーをつなぐ</li>
+      <li>UIプレハブ管理（見た目の差し替え）</li>
+      <li>追加パックの作り方</li>
+      <li>見本：アクションゲーム用パック</li>
+      <li>書き出し・配布</li>
+      <li>組み込みコマンド一覧</li>
+      <li>困ったときは</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ───────────────────────── 1 ───────────────────────── -->
+<section>
+  <h2>1. 全体の構成</h2>
+  <div class="diagram">
+    <div class="blk game"><b>あなたのゲーム</b>プレイヤー操作<br>敵・ステージ<br>BGM・UI など</div>
+    <div class="blk addon"><b>追加パック</b>（例：HorrorKit）<br>拡張コマンド<br>演出オブジェクト<br>プレイヤーの実装</div>
+    <div class="blk core"><b>EventKit（共通）</b>イベント／イベントエディタ<br>フラグ・アイテム（マネージャー）<br>会話UI・UIプレハブ管理<br>カメラ演出・シーン遷移・ワープ<br>ドア・出現地点</div>
+  </div>
+  <p>矢印の向きは「左が右を使う」です。<b>EventKit は追加パックやゲームのことを知りません。</b> そのため EventKit のフォルダだけを別プロジェクトにコピーしても動きます。</p>
+
+  <h3>フォルダ</h3>
+  <table>
+    <tr><th>場所</th><th>中身</th></tr>
+    <tr><td><code>EventKit/Runtime</code></td><td>実行時のスクリプト（アセンブリ <code>EventKit.Runtime</code>）。Core（フラグ・入力・シーン遷移・プレイヤー窓口）／Events（イベント本体・実行）／World（ドア・出現地点）／Player（調べる）／UI</td></tr>
+    <tr><td><code>EventKit/Editor</code></td><td>イベントエディタ・マネージャー・UIプレハブ管理など（アセンブリ <code>EventKit.Editor</code>）</td></tr>
+    <tr><td><code>EventKit/Resources</code></td><td><code>EventDatabase</code>（アイテム・フラグの定義）、<code>EventUISettings</code>（UIプレハブ管理）</td></tr>
+    <tr><td><code>EventKit/Prefabs/UI</code></td><td>標準の UI プレハブ（会話・選択肢・プロンプト・所持品・フェード・ロード画面）</td></tr>
+    <tr><td><code>HorrorKit/Scripts</code></td><td>ホラー用の追加パック（アセンブリ <code>HorrorKit.Runtime</code>。EventKit.Runtime を参照）</td></tr>
+    <tr><td><code>HorrorKit/Editor</code></td><td>ホラー用のセットアップ・メニュー</td></tr>
+  </table>
+
+  <h3>メニュー</h3>
+  <table>
+    <tr><th>メニュー</th><th>内容</th></tr>
+    <tr><td>EventKit &gt; マネージャー（Ctrl+Shift+H）</td><td>アイテム・フラグ・イベント・会話の一括管理</td></tr>
+    <tr><td>EventKit &gt; イベントエディタ（Ctrl+Shift+E）</td><td>イベントの編集（ページ・出現条件・実行内容）</td></tr>
+    <tr><td>EventKit &gt; UIプレハブ管理</td><td>会話ウィンドウなどの見た目の差し替え</td></tr>
+    <tr><td>EventKit &gt; セットアップ &gt; シーンにイベント基盤を配置</td><td>EventRunner と EventHUD をシーンに置く</td></tr>
+    <tr><td>EventKit &gt; 書き出し</td><td>.unitypackage に書き出す（EventKit だけ／追加パック込み）</td></tr>
+    <tr><td>Hierarchy 右クリック &gt; EventKit</td><td>調べるイベント・エリアイベント・振り返り会話・ドア・引き戸・出現地点</td></tr>
+    <tr><td>Hierarchy 右クリック &gt; HorrorKit</td><td>ジャンプスケア・ちらつくライト（ホラー用）</td></tr>
+  </table>
+
+  <h3>名前の対応（以前の HorrorKit からの変更）</h3>
+  <table>
+    <tr><th>以前</th><th>今</th><th>備考</th></tr>
+    <tr><td>HorrorEvent</td><td><b>GameEvent</b></td><td>シーンに置いたイベントはそのまま使えます</td></tr>
+    <tr><td>HorrorDatabase</td><td><b>EventDatabase</b></td><td>Resources/EventDatabase.asset</td></tr>
+    <tr><td>HorrorHUD</td><td><b>EventHUD</b></td><td>見た目は UIプレハブ管理で変える</td></tr>
+    <tr><td>HorrorInput（の一部）</td><td><b>EventInput</b></td><td>調べる・会話送り・選択・所持品。視点やダッシュは HorrorInput に残る</td></tr>
+  </table>
+</section>
+
+<!-- ───────────────────────── 2 ───────────────────────── -->
+<section>
+  <h2>2. 別のプロジェクトへ移す</h2>
+  <h3>必要なもの</h3>
+  <table>
+    <tr><th>パッケージ</th><th>用途</th><th>必須</th></tr>
+    <tr><td>Input System</td><td>調べる・会話送り・選択肢の入力</td><td>必須</td></tr>
+    <tr><td>Cinemachine 3</td><td>視点変更・カメラシェイク</td><td>必須</td></tr>
+    <tr><td>Unity UI（uGUI）</td><td>会話ウィンドウなど</td><td>必須（標準で入っています）</td></tr>
+    <tr><td>URP</td><td>視点変更のプレビューでポストプロセスを再現</td><td>任意（無くても動く）</td></tr>
+  </table>
+  <div class="note">Player Settings の <b>Active Input Handling</b> は「Input System Package」か「Both」にしてください。</div>
+
+  <h3>手順</h3>
+  <ol class="steps">
+    <li><b>書き出す</b>：元のプロジェクトで <i>EventKit &gt; 書き出し &gt; EventKit だけ</i>（追加パックも持っていくなら「＋追加パック」）。<br>
+      または <code>Assets/_Project/EventKit</code> フォルダを <b>.meta ファイルごと</b> コピーしても構いません。</li>
+    <li><b>読み込む</b>：移植先で <i>Assets &gt; Import Package &gt; Custom Package</i> から .unitypackage を読み込みます。</li>
+    <li><b>シーンに基盤を置く</b>：イベントを使うシーンを開き、<i>EventKit &gt; セットアップ &gt; シーンにイベント基盤を配置</i>。<br>
+      <code>[EventKit Systems]</code>（EventRunner）と <code>[EventKit HUD]</code>（EventHUD）が置かれます。</li>
+    <li><b>プレイヤーをつなぐ</b>：自分のプレイヤーのスクリプトに <code>IEventPlayer</code> を実装し、調べる用に <code>PlayerInteractor</code> を付けます（次の章）。</li>
+    <li><b>カメラ</b>：Main Camera に <code>CinemachineBrain</code>、プレイヤーのカメラが <code>CinemachineCamera</code> であることを確認します。カメラシェイクで揺らすなら、プレイヤーのカメラに <code>EventShakeReceiver</code> を付けます。</li>
+    <li><b>（必要なら）入力を差し替え</b>：自前の InputAction を使うなら、ゲーム開始時に <code>EventInput.Use(...)</code> を呼びます。</li>
+    <li><b>動作確認</b>：Hierarchy 右クリック <i>EventKit &gt; 調べるイベント</i> を置き、プレイして調べられれば完了です。</li>
+  </ol>
+
+  <h3>入力を自分のアクションに合わせる</h3>
+<pre><span class="c">// 例：Input Actions アセットから作ったクラス（PlayerControls）を使う場合</span>
+<span class="k">void</span> Awake()
+{
+    <span class="k">var</span> controls = <span class="k">new</span> PlayerControls();
+    EventKit.EventInput.Use(
+        move:      controls.UI.Navigate,     <span class="c">// 選択肢・所持品の上下</span>
+        interact:  controls.Player.Interact, <span class="c">// 調べる</span>
+        submit:    controls.UI.Submit,       <span class="c">// 会話送り・決定</span>
+        inventory: controls.Player.Menu);    <span class="c">// 所持品（使わなければ省略）</span>
+}</pre>
+  <p class="small">指定しなかった項目は標準の割り当て（E/左クリック/Space/Enter/Tab、ゲームパッド南ボタンなど）のままです。</p>
+
+  <h3>イベント中にプレイヤーを止める</h3>
+  <p>イベントの実行中・所持品を開いている間は <code>InputLock.IsLocked</code> が true になります。プレイヤーの移動・攻撃などはこれを見て止めてください。</p>
+<pre><span class="k">void</span> Update()
+{
+    <span class="k">if</span> (EventKit.InputLock.IsLocked) <span class="k">return</span>;   <span class="c">// 会話中は動かない</span>
+    ...
+}</pre>
+</section>
+
+<!-- ───────────────────────── 3 ───────────────────────── -->
+<section>
+  <h2>3. プレイヤーをつなぐ</h2>
+  <p>イベントがプレイヤーを操作するのは次の3つだけです。これを <code>IEventPlayer</code> として実装します。</p>
+  <table>
+    <tr><th>メンバー</th><th>使われる場面</th></tr>
+    <tr><td><code>PlayerTransform</code></td><td>エリアイベントの判定、ワープ</td></tr>
+    <tr><td><code>Teleport(position, yaw)</code></td><td>シーン遷移の到着、シーン内ワープ</td></tr>
+    <tr><td><code>LookAt(target, blend, hold)</code></td><td>会話の「振り向く先」、視点を向ける（振り返る）</td></tr>
+  </table>
+
+  <h3>例：三人称のアクションゲーム</h3>
+<pre><span class="k">using</span> System.Collections;
+<span class="k">using</span> EventKit;
+<span class="k">using</span> UnityEngine;
+
+<span class="k">public class</span> ActionPlayer : MonoBehaviour, IEventPlayer
+{
+    CharacterController controller;
+
+    <span class="k">void</span> Awake()     { controller = GetComponent&lt;CharacterController&gt;(); }
+    <span class="k">void</span> OnEnable()  =&gt; EventPlayer.Register(<span class="k">this</span>);    <span class="c">// ← イベントに「これがプレイヤー」と知らせる</span>
+    <span class="k">void</span> OnDisable() =&gt; EventPlayer.Unregister(<span class="k">this</span>);
+
+    <span class="k">public</span> Transform PlayerTransform =&gt; transform;
+
+    <span class="k">public void</span> Teleport(Vector3 position, <span class="k">float</span> yaw)
+    {
+        controller.enabled = <span class="k">false</span>;                       <span class="c">// CharacterController は一度切ってから動かす</span>
+        transform.SetPositionAndRotation(position, Quaternion.Euler(0, yaw, 0));
+        controller.enabled = <span class="k">true</span>;
+    }
+
+    <span class="k">public</span> IEnumerator LookAt(Transform target, <span class="k">float</span> blendTime, <span class="k">float</span> holdTime)
+    {
+        <span class="c">// 三人称なら「キャラの体をそちらへ向ける」で十分</span>
+        Vector3 dir = target.position - transform.position; dir.y = 0;
+        <span class="k">if</span> (dir.sqrMagnitude &lt; 0.001f) <span class="k">yield break</span>;
+        Quaternion from = transform.rotation, to = Quaternion.LookRotation(dir);
+        <span class="k">for</span> (<span class="k">float</span> t = 0; t &lt; blendTime; t += Time.deltaTime)
+        {
+            transform.rotation = Quaternion.Slerp(from, to, t / blendTime);
+            <span class="k">yield return null</span>;
+        }
+        transform.rotation = to;
+        <span class="k">if</span> (holdTime &gt; blendTime) <span class="k">yield return new</span> WaitForSeconds(holdTime - blendTime);
+    }
+}</pre>
+  <div class="tip">一人称の実装は HorrorKit の <code>FirstPersonController</code> がそのまま見本になります（カメラの上下も含めて振り向く）。</div>
+
+  <h3>「調べる」の仕組み</h3>
+  <p><code>PlayerInteractor</code> は、<code>origin</code> から前方へレイを飛ばし、当たった物の <code>IInteractable</code>（イベント・ドア）を調べます。</p>
+  <ul>
+    <li>一人称：<code>origin</code> にカメラの位置（CameraRoot）を指定</li>
+    <li>三人称：<code>origin</code> にキャラの胸の高さの子オブジェクト（キャラの前方を向く）を指定し、<code>distance</code> を 1.5 程度に</li>
+  </ul>
+  <p>近くの物を自動で選ぶ方式にしたい場合は、自分で <code>IInteractable</code> を探して <code>Interact(...)</code> を呼べば同じように動きます。プロンプト表示は <code>EventHUD.Instance.SetPrompt("調べる")</code>、消すときは <code>SetPrompt(null)</code> です。</p>
+
+  <h3>自分のスクリプトから使える主な機能</h3>
+  <table>
+    <tr><th>やりたいこと</th><th>呼び方</th></tr>
+    <tr><td>フラグ・アイテム</td><td><code>GameState.SetFlag("id", true)</code> / <code>GetFlag</code> / <code>AddItem</code> / <code>HasItem</code> / <code>RemoveItem</code></td></tr>
+    <tr><td>イベントを実行</td><td><code>gameEvent.RunActivePage()</code></td></tr>
+    <tr><td>メッセージだけ出す</td><td><code>EventRunner.Instance.ShowMessages("1行目", "2行目")</code></td></tr>
+    <tr><td>イベント中か</td><td><code>EventRunner.IsBusy</code></td></tr>
+    <tr><td>シーン遷移</td><td><code>SceneTransfer.Begin("Assets/…/Stage2.unity", "start", 1f, 1f)</code></td></tr>
+    <tr><td>フラグ等が変わったとき</td><td><code>GameState.Changed += 自分の処理;</code></td></tr>
+  </table>
+</section>
+
+<!-- ───────────────────────── 4 ───────────────────────── -->
+<section>
+  <h2>4. UIプレハブ管理（見た目の差し替え）</h2>
+  <div class="two">
+    <div>
+      <p>ゲーム中の UI は、すべて <b>プレハブ</b> から作られます。どのプレハブを使うかは <i>EventKit &gt; UIプレハブ管理</i> で指定します。</p>
+      <table>
+        <tr><th>欄</th><th>部品（コンポーネント）</th></tr>
+        <tr><td>会話ウィンドウ</td><td>DialogueWindow</td></tr>
+        <tr><td>選択肢</td><td>ChoiceWindow</td></tr>
+        <tr><td>調べるプロンプト・照準</td><td>InteractPrompt</td></tr>
+        <tr><td>所持品ウィンドウ</td><td>InventoryWindow</td></tr>
+        <tr><td>フェード</td><td>ScreenFader</td></tr>
+        <tr><td>ロード画面</td><td>LoadingScreen</td></tr>
+      </table>
+      <p class="small">欄を空にすると、その UI は表示されません（例：アクションゲームで照準が不要なら「調べるプロンプト」を空に）。</p>
+      <h3>差し替えの手順</h3>
+      <ol class="steps">
+        <li>変えたい欄の <b>「複製して差し替え」</b> を押し、保存先を選ぶ（標準では <code>Assets/_Project/UI</code>）。</li>
+        <li><b>「開いて編集」</b> でプレハブを開き、画像・色・配置・フォントを自由に変える。</li>
+        <li>プレイして確認。戻したいときは <b>「標準に戻す」</b>。</li>
+      </ol>
+      <div class="note">標準プレハブ（EventKit/Prefabs/UI）を直接編集すると、EventKit を入れ直したときに上書きされます。必ず複製してから編集してください。</div>
+    </div>
+    <div style="flex:0 0 46%">
+      <figure><img src="images/doc_uiprefab.png"><figcaption>UIプレハブ管理</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h3>各プレハブで「つなぐ」部品</h3>
+  <p>プレハブの中身は自由に作り替えて構いません。ルートに付いたコンポーネントの欄に、表示に使う部品をつないでおけば動きます。</p>
+  <table class="compact">
+    <tr><th>コンポーネント</th><th>欄</th><th>説明</th></tr>
+    <tr><td rowspan="5">DialogueWindow</td><td>speakerRoot / speakerText</td><td>話者名の枠と文字（話者が空なら枠ごと隠れる）</td></tr>
+    <tr><td>bodyText</td><td>本文（1文字ずつ表示。リッチテキスト可）</td></tr>
+    <tr><td>nextIndicator</td><td>送りマーク（▼）。全文が出ると点滅</td></tr>
+    <tr><td>charactersPerSecond</td><td>表示の速さ</td></tr>
+    <tr><td>typeSound</td><td>1文字ごとの音（任意）</td></tr>
+    <tr><td rowspan="2">ChoiceWindow</td><td>itemContainer</td><td>選択肢を並べる親（Vertical/Horizontal Layout Group で並び方が決まる）</td></tr>
+    <tr><td>itemTemplate / selectedFormat</td><td>1つ分の見本（非アクティブ）と、選択中の書式（<code>{0}</code> に文言）</td></tr>
+    <tr><td rowspan="2">InteractPrompt</td><td>crosshair</td><td>照準（任意）。調べられる物を見ると focusedSize になる</td></tr>
+    <tr><td>promptRoot / promptText / format</td><td>「[E] 調べる」。<code>{0}</code>=キー表記、<code>{1}</code>=行動名</td></tr>
+    <tr><td>InventoryWindow</td><td>listText / descriptionText / iconImage</td><td>一覧・説明・アイコン（アイテム定義の icon）</td></tr>
+    <tr><td>ScreenFader</td><td>（CanvasGroup）</td><td>透明度で暗転。中の画像を白にすれば白フェード</td></tr>
+    <tr><td>LoadingScreen</td><td>progressBar / progressFill / progressText / blink</td><td>読み込みの進み具合、点滅する文字（すべて任意）</td></tr>
+  </table>
+
+  <h3>フォント</h3>
+  <p>UIプレハブ管理の <b>フォント</b> を指定すると、未設定・Unity 標準フォントの Text がそのフォントになります。空なら OS の日本語フォント（游ゴシック・メイリオ・ヒラギノ…）を使います。プレハブの Text に自分でフォントを指定した場合は、そのまま使われます。</p>
+
+  <h3>動きごと変えたいとき（上級）</h3>
+  <p>各ウィンドウのメソッドは <code>virtual</code> です。継承したクラスをプレハブに付ければ、表示の仕方を変えられます。</p>
+<pre><span class="c">// 例：本文を一瞬で全部出し、ウィンドウを下からスライドインさせる会話ウィンドウ</span>
+<span class="k">public class</span> SlideDialogueWindow : EventKit.DialogueWindow
+{
+    <span class="k">public override</span> IEnumerator Show(<span class="k">string</span> speaker, <span class="k">string</span> text, System.Func&lt;<span class="k">bool</span>&gt; submitPressed)
+    {
+        <span class="k">var</span> rt = (RectTransform)transform;
+        gameObject.SetActive(<span class="k">true</span>);
+        <span class="k">for</span> (<span class="k">float</span> t = 0; t &lt; 0.15f; t += Time.deltaTime)
+        { rt.anchoredPosition = <span class="k">new</span> Vector2(0, Mathf.Lerp(-200, 0, t / 0.15f)); <span class="k">yield return null</span>; }
+        rt.anchoredPosition = Vector2.zero;
+        <span class="k">yield return base</span>.Show(speaker, text, submitPressed);   <span class="c">// あとは標準どおり</span>
+    }
+}</pre>
+  <p class="small">シーンごとに別の UI を使いたいときは、そのシーンの EventHUD の <code>settingsOverride</code> に別の EventUISettings アセットを指定します（Create &gt; EventKit &gt; UI Settings）。</p>
+</section>
+
+<!-- ───────────────────────── 5 ───────────────────────── -->
+<section>
+  <h2>5. 追加パックの作り方</h2>
+  <p>追加パックは「EventKit を使う側」のフォルダです。EventKit には手を入れずに、コマンドや演出を足せます。</p>
+
+  <h3>5-1. フォルダとアセンブリ</h3>
+<pre>Assets/_Project/ActionKit/              <span class="c">← パックのフォルダ（名前は自由）</span>
+  Scripts/
+    ActionKit.Runtime.asmdef            <span class="c">← references に "EventKit.Runtime" を入れる</span>
+    Commands/ActionCommands.cs          <span class="c">← 拡張コマンド</span>
+    Player/ActionPlayer.cs              <span class="c">← IEventPlayer の実装</span>
+  Editor/
+    ActionKit.Editor.asmdef             <span class="c">← Editor 専用。"EventKit.Editor" "ActionKit.Runtime" を参照</span></pre>
+  <ol class="steps">
+    <li>Project ウィンドウで <i>Create &gt; Scripting &gt; Assembly Definition</i> を作り、名前を <code>ActionKit.Runtime</code> に。</li>
+    <li>Inspector の <b>Assembly Definition References</b> に <code>EventKit.Runtime</code> を追加（Cinemachine 等を使うならそれも）。</li>
+    <li>エディタ拡張を作るなら Editor フォルダにも asmdef を作り、Platforms を <b>Editor のみ</b> にする。</li>
+  </ol>
+  <div class="tip">asmdef を作らずに Assets 直下などへ置いた普通のスクリプトからも EventKit は使えます（Assembly-CSharp は EventKit を自動で参照します）。ただしパックとして配るなら asmdef があると扱いやすくなります。</div>
+
+  <h3>5-2. 拡張コマンド（いちばんよく使う）</h3>
+  <p><code>CustomCommand</code> を継承したクラスを1つ書くと、イベントエディタの「＋ コマンドを挿入」の右端の列に自動で並びます。</p>
+<pre><span class="k">using</span> System;
+<span class="k">using</span> System.Collections;
+<span class="k">using</span> EventKit;
+<span class="k">using</span> UnityEngine;
+
+[Serializable, EventCommand(<span class="s">"ホラー/懐中電灯の明滅"</span>)]     <span class="c">// ← 「グループ/表示名」</span>
+<span class="k">public class</span> FlickerFlashlightCommand : CustomCommand
+{
+    [EventLabel(<span class="s">"秒数"</span>)] <span class="k">public float</span> seconds = 1f;        <span class="c">// ← public フィールドが設定欄になる</span>
+    [EventLabel(<span class="s">"終わるまで待つ"</span>)] <span class="k">public bool</span> waitUntilEnd;
+
+    <span class="c">// イベントエディタの ◆ 行に出る説明</span>
+    <span class="k">public override string</span> Summary =&gt; $<span class="s">"懐中電灯の明滅：{seconds}秒"</span>;
+
+    <span class="c">// 実行内容。yield return で待つと、終わるまで次のコマンドへ進まない</span>
+    <span class="k">public override</span> IEnumerator Run(EventContext context)
+    {
+        <span class="k">if</span> (Flashlight.Instance != <span class="k">null</span>) Flashlight.Instance.Flicker(seconds);
+        <span class="k">if</span> (waitUntilEnd) <span class="k">yield return new</span> WaitForSeconds(seconds);
+    }
+}</pre>
+  <figure><img src="images/doc_custom.png" style="max-width:88%"><figcaption>拡張コマンドを選んだところ。クラスの public フィールドがそのまま設定欄になる</figcaption></figure>
+</section>
+
+<section>
+  <h4>拡張コマンドで使えるもの</h4>
+  <table>
+    <tr><th>項目</th><th>内容</th></tr>
+    <tr><td><code>[Serializable]</code></td><td><b>必須</b>。付けないと設定が保存されません</td></tr>
+    <tr><td><code>[EventCommand("グループ/名前")]</code></td><td>挿入メニューの場所。同じグループ名はまとめて表示</td></tr>
+    <tr><td><code>[EventLabel("項目名")]</code></td><td>設定欄の見出しを日本語にする</td></tr>
+    <tr><td>フィールドの型</td><td>数値・文字・bool・enum・Vector3・Color・GameObject・コンポーネント・プレハブ・AudioClip・List など、Unity で保存できる型。<b>シーン内のオブジェクトも参照できます</b>（イベントと同じシーンに限る）</td></tr>
+    <tr><td><code>[ItemId]</code> / <code>[FlagId]</code></td><td>string に付けるとアイテム・フラグをプルダウンで選べる</td></tr>
+    <tr><td><code>Summary</code></td><td>◆ 行の説明（未設定の項目は <code>Name(obj)</code> で「（未設定）」と出せる）</td></tr>
+    <tr><td><code>HidesDialogue</code></td><td>true にすると実行中は会話ウィンドウを閉じる（演出向き）</td></tr>
+    <tr><td><code>Run(context)</code></td><td><code>context.Runner</code>（StartCoroutine 用）、<code>context.Source</code>（実行中のイベント）、<code>context.HUD</code>、<code>context.Player</code> が使える</td></tr>
+  </table>
+  <div class="tip"><b>「待つ／待たない」の作り方</b>：Run の中で <code>yield return</code> すると終わるまでイベントが止まります。待たせたくない処理は <code>context.Runner.StartCoroutine(...)</code> で別に動かし、Run はすぐ終えます。</div>
+  <div class="note">クラス名・名前空間を後から変えると、そのコマンドを使っているイベントの設定が失われます。変えるときは <code>[UnityEngine.Scripting.APIUpdating.MovedFrom]</code> 属性を使ってください。</div>
+
+  <h3>5-3. 演出オブジェクト（IEventPerformance）</h3>
+  <p>シーンに置いた物を「演出オブジェクトを再生」コマンドで再生したいときは、コンポーネントに <code>IEventPerformance</code> を実装します（HorrorKit の JumpScare が見本）。</p>
+<pre><span class="k">public class</span> BossEntrance : MonoBehaviour, EventKit.IEventPerformance
+{
+    <span class="k">public</span> Animator boss;
+    <span class="k">public</span> IEnumerator Play()
+    {
+        boss.gameObject.SetActive(<span class="k">true</span>);
+        boss.SetTrigger(<span class="s">"Roar"</span>);
+        <span class="k">yield return new</span> WaitForSeconds(2.5f);   <span class="c">// 終わるまでイベントは待つ</span>
+    }
+}</pre>
+  <p>コマンドの「演出オブジェクト」欄に GameObject をドロップすると、IEventPerformance を持つコンポーネントが自動で選ばれます。</p>
+
+  <h3>5-4. 調べられる物（IInteractable）</h3>
+  <p>イベントを使わず、スクリプトだけで「調べる」に反応させたい物は <code>IInteractable</code> を実装します（EventKit の Door が見本）。</p>
+<pre><span class="k">public class</span> SavePoint : MonoBehaviour, EventKit.IInteractable
+{
+    <span class="k">public string</span> InteractPrompt =&gt; <span class="s">"セーブする"</span>;
+    <span class="k">public bool</span> CanInteract =&gt; !EventKit.EventRunner.IsBusy;
+    <span class="k">public void</span> Interact(EventKit.PlayerInteractor interactor)
+    {
+        MySaveSystem.Save();
+        EventKit.EventRunner.Instance.ShowMessages(<span class="s">"記録しました。"</span>);
+    }
+}</pre>
+
+  <h3>5-5. アイテム・フラグとの連携</h3>
+  <p>自分のコンポーネントの string フィールドに <code>[ItemId]</code> / <code>[FlagId]</code> を付けると、プルダウンで選べるだけでなく、<b>マネージャーの「参照で絞り込み」「ID の一括置換」の対象</b> にも自動で入ります。</p>
+</section>
+
+<section>
+  <h3>5-6. 組み込みコマンドの処理を追加パックで受け持つ（RegisterHandler）</h3>
+  <p>EventKit の組み込みコマンドのうち、ゲームによって中身が変わるもの（例：「懐中電灯を明滅」）は、追加パックが処理を登録します。</p>
+<pre><span class="k">static class</span> HorrorKitCommandHandlers
+{
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    <span class="k">static void</span> Register() =&gt;
+        EventRunner.RegisterHandler(CommandType.FlickerFlashlight, c =&gt; Flicker(c.duration));
+    ...
+}</pre>
+  <p class="small">新しいコマンドを作るときは 5-2 の拡張コマンドの方が簡単です。RegisterHandler は既存データとの互換のための仕組みです。</p>
+
+  <h3>5-7. モーション再生・カメラ演出と組み合わせる</h3>
+  <p>組み込みの「モーション再生」（Animator のステート／トリガー／クリップ）、「視点変更」「カメラシェイク」「移動・回転・スケール」は追加パック無しで使えます。追加パックでは、それで足りない「ゲーム固有の処理」だけを拡張コマンドにするのがおすすめです。</p>
+  <figure class="half"><img src="images/doc_anim.png"><figcaption>モーション再生：Animator Controller のステート／トリガーをプルダウンで選べる。▶ プレビューでポーズ確認</figcaption></figure>
+
+  <h3>5-8. チェックリスト</h3>
+  <table>
+    <tr><th>確認</th><th>内容</th></tr>
+    <tr><td>☐</td><td>パックの asmdef が <code>EventKit.Runtime</code> を参照している</td></tr>
+    <tr><td>☐</td><td>拡張コマンドに <code>[Serializable]</code> と <code>[EventCommand]</code> が付いている</td></tr>
+    <tr><td>☐</td><td>拡張コマンドに引数なしのコンストラクタがある（書かなければ自動である）</td></tr>
+    <tr><td>☐</td><td>プレイヤーが <code>EventPlayer.Register(this)</code> している</td></tr>
+    <tr><td>☐</td><td>EventKit のフォルダの中にはファイルを足していない（更新で消えないように）</td></tr>
+  </table>
+</section>
+
+<!-- ───────────────────────── 6 ───────────────────────── -->
+<section>
+  <h2>6. 見本：アクションゲーム用パック</h2>
+  <p>アクションゲームでよく使うコマンドを3つ作る例です。<code>ActionKit/Scripts/Commands/ActionCommands.cs</code> として置けば、挿入メニューに「アクション」の列ができます。</p>
+<pre><span class="k">using</span> System;
+<span class="k">using</span> System.Collections;
+<span class="k">using</span> EventKit;
+<span class="k">using</span> UnityEngine;
+
+[Serializable, EventCommand(<span class="s">"アクション/敵を出現させる"</span>)]
+<span class="k">public class</span> SpawnEnemyCommand : CustomCommand
+{
+    [EventLabel(<span class="s">"敵プレハブ"</span>)] <span class="k">public</span> GameObject enemyPrefab;
+    [EventLabel(<span class="s">"出現位置"</span>)]  <span class="k">public</span> Transform spawnPoint;
+    [EventLabel(<span class="s">"数"</span>)]        <span class="k">public int</span> count = 1;
+    [EventLabel(<span class="s">"全滅まで待つ"</span>)] <span class="k">public bool</span> waitUntilDefeated;
+
+    <span class="k">public override string</span> Summary =&gt; $<span class="s">"敵を出現：{Name(enemyPrefab)} ×{count}"</span> + (waitUntilDefeated ? <span class="s">"（全滅まで待機）"</span> : <span class="s">""</span>);
+
+    <span class="k">public override</span> IEnumerator Run(EventContext context)
+    {
+        <span class="k">var</span> spawned = <span class="k">new</span> System.Collections.Generic.List&lt;GameObject&gt;();
+        <span class="k">for</span> (<span class="k">int</span> i = 0; i &lt; count; i++)
+            spawned.Add(UnityEngine.Object.Instantiate(enemyPrefab, spawnPoint.position + Vector3.right * i, spawnPoint.rotation));
+        <span class="k">if</span> (!waitUntilDefeated) <span class="k">yield break</span>;
+        InputLock.Pop();                                      <span class="c">// 戦っている間はプレイヤーを動かせるように</span>
+        <span class="k">while</span> (spawned.Exists(e =&gt; e != <span class="k">null</span>)) <span class="k">yield return null</span>;  <span class="c">// 倒されると Destroy される想定</span>
+        InputLock.Push();
+    }
+}
+
+[Serializable, EventCommand(<span class="s">"アクション/HPを回復"</span>)]
+<span class="k">public class</span> HealCommand : CustomCommand
+{
+    [EventLabel(<span class="s">"回復量"</span>)] <span class="k">public int</span> amount = 50;
+    <span class="k">public override string</span> Summary =&gt; $<span class="s">"HPを回復：{amount}"</span>;
+    <span class="k">public override</span> IEnumerator Run(EventContext context)
+    {
+        <span class="k">var</span> hp = (context.Player <span class="k">as</span> Component)?.GetComponent&lt;PlayerHealth&gt;();
+        <span class="k">if</span> (hp != <span class="k">null</span>) hp.Heal(amount);
+        <span class="k">yield break</span>;
+    }
+}
+
+[Serializable, EventCommand(<span class="s">"アクション/BGMを切り替える"</span>)]
+<span class="k">public class</span> ChangeBgmCommand : CustomCommand
+{
+    [EventLabel(<span class="s">"曲"</span>)]        <span class="k">public</span> AudioClip bgm;
+    [EventLabel(<span class="s">"切替秒数"</span>)]  <span class="k">public float</span> fade = 1f;
+    <span class="k">public override string</span> Summary =&gt; $<span class="s">"BGM：{Name(bgm)}"</span>;
+    <span class="k">public override</span> IEnumerator Run(EventContext context)
+    {
+        BgmPlayer.Instance.CrossFade(bgm, fade);   <span class="c">// 自分のゲームの BGM 管理を呼ぶ</span>
+        <span class="k">yield break</span>;
+    }
+}</pre>
+  <div class="tip"><code>PlayerHealth</code> や <code>BgmPlayer</code> は「自分のゲームのクラス」の例です。追加パックは、EventKit とゲーム側のクラスの両方を使ってよい場所です。</div>
+  <h4>使い方（イベントの組み立て例：中ボス戦）</h4>
+<pre>◆文章：？？？：……ここから先へは行かせない。
+◆視点変更：1秒で切り替え（終了まで待機）
+◆モーション再生：Boss「トリガー Roar」（終了まで待機）
+◆カメラシェイク：0.6秒・強さ1.5（そのまま次へ）
+◆視点変更解除：0.5秒で通常視点へ（終了まで待機）
+◆BGM：boss_theme
+◆敵を出現：Boss ×1（全滅まで待機）
+◆フラグ操作：boss1_defeated = ON
+◆ドアを解錠：BossRoomDoor</pre>
+</section>
+
+<!-- ───────────────────────── 7 ───────────────────────── -->
+<section>
+  <h2>7. 書き出し・配布</h2>
+  <table>
+    <tr><th>メニュー</th><th>書き出されるもの</th></tr>
+    <tr><td>EventKit &gt; 書き出し &gt; EventKit だけ</td><td>EventKit フォルダ（スクリプト・標準UI・データ）</td></tr>
+    <tr><td>EventKit &gt; 書き出し &gt; EventKit ＋ 追加パック</td><td>EventKit と、<code>EventKit.Runtime</code> を参照している asmdef のパック（HorrorKit など）</td></tr>
+  </table>
+  <h3>移植先に持っていかないもの</h3>
+  <ul>
+    <li><code>Resources/EventDatabase.asset</code> の中身（アイテム・フラグ）は元のゲームのものです。移植先ではマネージャーで不要なアイテム・フラグを消してから使ってください。</li>
+    <li>デモシーンやホラー用の素材（HorrorKit/Demo など）は不要なら除外します。</li>
+  </ul>
+  <h3>更新するとき</h3>
+  <ol class="steps">
+    <li>新しい EventKit の .unitypackage を読み込む（上書き）。</li>
+    <li>自分で作った物（複製した UI プレハブ、追加パック、EventDatabase の中身）は EventKit フォルダの外 or 別アセットなので、そのまま残ります。</li>
+    <li>標準 UI プレハブだけは上書きされるので、直接編集していた場合は「複製して差し替え」に移しておきます。</li>
+  </ol>
+</section>
+
+<!-- ───────────────────────── 8 ───────────────────────── -->
+<section>
+  <h2>8. 組み込みコマンド一覧</h2>
+  <table class="compact">
+    <tr><th>グループ</th><th>コマンド</th><th>主な設定</th></tr>
+    <tr><td rowspan="2">会話</td><td>文章の表示</td><td>話者・本文・音・振り向く先</td></tr>
+    <tr><td>選択肢の表示</td><td>選択肢（最大6）。［○○］のときの中を実行</td></tr>
+    <tr><td rowspan="8">進行・フロー</td><td>フラグの操作</td><td>フラグ・ON/OFF</td></tr>
+    <tr><td>アイテムの入手／失う</td><td>アイテム・通知の有無</td></tr>
+    <tr><td>条件分岐</td><td>フラグ／所持品。それ以外のときの有無</td></tr>
+    <tr><td>イベントの呼び出し</td><td>別のイベントの有効ページを実行</td></tr>
+    <tr><td>待機</td><td>秒数</td></tr>
+    <tr><td>UnityEventの実行</td><td>任意のメソッドを呼ぶ</td></tr>
+    <tr><td>イベント処理の中断</td><td>以降を実行しない</td></tr>
+    <tr><td>拡張コマンド</td><td>追加パックのコマンド</td></tr>
+    <tr><td rowspan="4">演出</td><td>効果音</td><td>音・鳴らす場所・終わるまで待つ</td></tr>
+    <tr><td>演出オブジェクトを再生</td><td>IEventPerformance（ジャンプスケア等）</td></tr>
+    <tr><td>フェードアウト／イン</td><td>秒数</td></tr>
+    <tr><td>懐中電灯を明滅</td><td>（HorrorKit が処理。以前のデータ用）</td></tr>
+    <tr><td rowspan="3">シーン・移動</td><td>シーン遷移</td><td>遷移先シーン・出現地点・フェード秒</td></tr>
+    <tr><td>ロード画面付きシーン遷移</td><td>＋ローディングUIプレハブ</td></tr>
+    <tr><td>シーン内ワープ</td><td>ワープ先・フェードあり/なし</td></tr>
+    <tr><td rowspan="4">カメラ</td><td>視点変更</td><td>位置・向き（シーンビューから設定）・画角・ブレンド秒・次へ</td></tr>
+    <tr><td>視点変更解除</td><td>戻る秒数・次へ</td></tr>
+    <tr><td>カメラシェイク</td><td>秒数・強さ・次へ</td></tr>
+    <tr><td>視点を向ける（振り返る）</td><td>向く先・秒数</td></tr>
+    <tr><td rowspan="7">オブジェクト</td><td>アクティブにする／非アクティブにする</td><td>対象</td></tr>
+    <tr><td>移動</td><td>対象・移動量・向き基準・秒数・次へ</td></tr>
+    <tr><td>回転</td><td>対象・ローカル/ワールド/加算・角度・秒数・次へ</td></tr>
+    <tr><td>スケール変更</td><td>対象・大きさ・秒数・次へ</td></tr>
+    <tr><td>モーション再生</td><td>対象・ステート/トリガー/クリップ・切替秒・次へ・プレビュー</td></tr>
+    <tr><td>ドアを開ける／閉める</td><td>ドア</td></tr>
+    <tr><td>ドアを施錠／解錠</td><td>ドア</td></tr>
+  </table>
+  <p class="small">「次へ」＝次に進める条件（そのまま次へ／終了するまで待機）。</p>
+</section>
+
+<!-- ───────────────────────── 9 ───────────────────────── -->
+<section>
+  <h2>9. 困ったときは</h2>
+  <table>
+    <tr><th>症状</th><th>原因と対処</th></tr>
+    <tr><td>会話ウィンドウが出ない</td><td>シーンに EventHUD が無い → <i>EventKit &gt; セットアップ &gt; シーンにイベント基盤を配置</i>。UIプレハブ管理の「会話ウィンドウ」が空になっていないか確認。</td></tr>
+    <tr><td>文字が □ になる・表示されない</td><td>フォントに日本語が無い → UIプレハブ管理の「フォント」に日本語フォントを指定。</td></tr>
+    <tr><td>調べても反応しない</td><td>プレイヤーに PlayerInteractor が無い／origin の向きが違う／イベントに通常の Collider が無い（Is Trigger は不可）。</td></tr>
+    <tr><td>エリアイベントが起動しない</td><td>プレイヤーが <code>EventPlayer.Register</code> していない、またはエリアの Collider が Is Trigger でない。プレイヤー側に Rigidbody か CharacterController が必要。</td></tr>
+    <tr><td>会話中もプレイヤーが動く</td><td>プレイヤーのスクリプトで <code>InputLock.IsLocked</code> を見ていない。</td></tr>
+    <tr><td>視点変更が効かない</td><td>Main Camera に CinemachineBrain が無い。</td></tr>
+    <tr><td>カメラシェイクでプレイヤーのカメラが揺れない</td><td>プレイヤーの CinemachineCamera に Noise（Basic Multi Channel Perlin）と <code>EventShakeReceiver</code> を付ける。</td></tr>
+    <tr><td>ビルドするとシーン遷移できない</td><td>遷移先シーンが Build Settings に入っていない → コマンドの「Build Settings に追加」を押す。</td></tr>
+    <tr><td>拡張コマンドが挿入メニューに出ない</td><td><code>[Serializable]</code> が無い／abstract になっている／コンパイルエラーがある。</td></tr>
+    <tr><td>拡張コマンドの設定が消えた</td><td>クラス名・名前空間を変えた → 元に戻すか MovedFrom 属性を付ける。</td></tr>
+    <tr><td>モーション再生でステートが選べない</td><td>対象に Animator が無い、または Animator Controller 未設定（名前を直接入力すれば動く）。</td></tr>
+  </table>
+</section>
+
+</body>
+</html>
