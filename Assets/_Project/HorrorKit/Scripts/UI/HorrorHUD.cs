@@ -26,9 +26,13 @@ namespace HorrorKit
         [Header("プロンプト")]
         public string interactKeyLabel = "E";
 
-        Text prompt, speakerText, bodyText, nextIndicator, inventoryList, inventoryDescription;
+        Text prompt, speakerText, bodyText, nextIndicator, inventoryList, inventoryDescription, choiceText;
         Image crosshair, fade;
-        GameObject dialogueRoot, speakerBox, inventoryRoot;
+        GameObject dialogueRoot, speakerBox, inventoryRoot, choiceRoot;
+
+        /// <summary>直前の選択肢で選ばれた番号（0始まり）。</summary>
+        public int LastChoice { get; private set; }
+        int pendingChoice = -1;
         AudioSource audioSource;
         bool inventoryOpen, navHeld, advanceRequested;
         int inventoryIndex;
@@ -110,6 +114,21 @@ namespace HorrorKit
             nextIndicator.text = "▼";
             Stretch(nextIndicator.rectTransform, Vector2.zero, Vector2.one, new Vector2(0, 14), new Vector2(-28, 0));
             dialogueRoot.SetActive(false);
+
+            // 選択肢（会話ウィンドウの右上に出る）
+            var ch = NewImage("Choices", root, new Color(0f, 0f, 0f, 0.85f));
+            choiceRoot = ch.gameObject;
+            var chRect = ch.rectTransform;
+            chRect.anchorMin = chRect.anchorMax = new Vector2(0.86f, 0.27f);
+            chRect.pivot = new Vector2(1f, 0f);
+            chRect.anchoredPosition = new Vector2(0, 12);
+            chRect.sizeDelta = new Vector2(420, 200);
+            var chLine = NewImage("Line", ch.transform, new Color(0.6f, 0.15f, 0.12f, 0.8f));
+            Stretch(chLine.rectTransform, new Vector2(0f, 1f), Vector2.one, new Vector2(0, -2), Vector2.zero);
+            choiceText = NewText("Text", ch.transform, 32, TextAnchor.UpperLeft, new Color(0.93f, 0.93f, 0.9f));
+            choiceText.lineSpacing = 1.25f;
+            Stretch(choiceText.rectTransform, Vector2.zero, Vector2.one, new Vector2(30, 18), new Vector2(-24, -18));
+            choiceRoot.SetActive(false);
 
             // 所持品
             var inv = NewImage("Inventory", root, new Color(0f, 0f, 0f, 0.88f));
@@ -293,6 +312,63 @@ namespace HorrorKit
         public void HideDialogue()
         {
             if (dialogueRoot != null) dialogueRoot.SetActive(false);
+        }
+
+        /// <summary>選択肢を出して、決定されるまで待つ。結果は LastChoice に入る。W/S・↑↓・スティックで選択、決定キーで確定。</summary>
+        public IEnumerator ShowChoices(System.Collections.Generic.IList<string> options)
+        {
+            int count = options.Count;
+            int index = 0;
+            bool held = true;
+            choiceRoot.SetActive(true);
+            prompt.gameObject.SetActive(false);
+            var rt = (RectTransform)choiceRoot.transform;
+            rt.sizeDelta = new Vector2(420, 40 + count * 48);
+            advanceRequested = false;
+
+            void Refresh()
+            {
+                var sb = new System.Text.StringBuilder();
+                for (int i = 0; i < count; i++)
+                    sb.AppendLine(i == index ? $"<color=#e8c872>▶ {options[i]}</color>" : $"　 {options[i]}");
+                choiceText.text = sb.ToString();
+            }
+            Refresh();
+            yield return null; // 開始フレームの決定入力を無視する
+
+            while (true)
+            {
+                float y = HorrorInput.Move.ReadValue<Vector2>().y;
+                if (Mathf.Abs(y) > 0.5f)
+                {
+                    if (!held)
+                    {
+                        index = (index + (y > 0 ? -1 : 1) + count) % count;
+                        held = true;
+                        Refresh();
+                    }
+                }
+                else held = false;
+
+                if (pendingChoice >= 0)
+                {
+                    index = Mathf.Clamp(pendingChoice, 0, count - 1);
+                    pendingChoice = -1;
+                    Refresh();
+                }
+
+                if (SubmitPressed()) break;
+                yield return null;
+            }
+
+            LastChoice = index;
+            choiceRoot.SetActive(false);
+        }
+
+        /// <summary>選択肢の番号を外部から決める（UIボタン・テスト用）。次の決定でその番号が確定する。</summary>
+        public void SelectChoice(int index)
+        {
+            pendingChoice = index;
         }
 
         public IEnumerator Fade(float targetAlpha, float duration)

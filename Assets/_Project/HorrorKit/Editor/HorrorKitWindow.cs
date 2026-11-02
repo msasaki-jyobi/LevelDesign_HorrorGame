@@ -329,8 +329,12 @@ namespace HorrorKit.EditorTools
             {
                 if (!string.IsNullOrEmpty(p.memo) && p.memo.ToLowerInvariant().Contains(s)) return true;
                 foreach (var c in p.commands)
+                {
                     if (c.type == CommandType.Message && ((c.text ?? "").ToLowerInvariant().Contains(s) || (c.speaker ?? "").ToLowerInvariant().Contains(s)))
                         return true;
+                    if (c.type == CommandType.ShowChoices && c.choices != null && c.choices.Exists(x => (x ?? "").ToLowerInvariant().Contains(s)))
+                        return true;
+                }
             }
             return false;
         }
@@ -348,6 +352,7 @@ namespace HorrorKit.EditorTools
                 {
                     if (item && c.IsItemCommand && c.itemId == id) return true;
                     if (!item && c.type == CommandType.SetFlag && c.flagId == id) return true;
+                    if (c.type == CommandType.If && c.condition != null && c.condition.IsItemCondition == item && c.condition.id == id) return true;
                 }
             }
             return false;

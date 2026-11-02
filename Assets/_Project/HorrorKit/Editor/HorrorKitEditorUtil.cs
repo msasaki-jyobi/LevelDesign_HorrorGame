@@ -183,6 +183,167 @@ namespace HorrorKit.EditorTools
             return $"[{TriggerLabel(p.trigger)}] {conds} → {p.commands.Count}コマンド{once} {memo}";
         }
 
+        // ───────── コマンドの1行表示（イベントエディタ用） ─────────
+
+        static string Short(string s, int max = 34)
+        {
+            s = FirstLine(s ?? "").Trim();
+            if (s.Length == 0) return "（空）";
+            return s.Length > max ? s.Substring(0, max) + "…" : s;
+        }
+
+        static string Name(Object o) => o != null ? o.name : "（未設定）";
+
+        /// <summary>start より前にある、この行を含むブロックの開始行の位置。無ければ -1。</summary>
+        public static int ParentOpener(IList<EventCommand> list, int index)
+        {
+            int depth = 0;
+            for (int i = index - 1; i >= 0; i--)
+            {
+                var t = list[i].type;
+                if (CommandTypes.IsCloser(t)) depth++;
+                else if (CommandTypes.IsOpener(t))
+                {
+                    if (depth == 0) return i;
+                    depth--;
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>各行の字下げ（入れ子の深さ）を計算する。</summary>
+        public static int[] Indents(IList<EventCommand> list)
+        {
+            var result = new int[list.Count];
+            int depth = 0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                var t = list[i] != null ? list[i].type : CommandType.Wait;
+                if (CommandTypes.IsCloser(t)) { depth = Mathf.Max(0, depth - 1); result[i] = depth; }
+                else if (CommandTypes.IsDivider(t)) result[i] = Mathf.Max(0, depth - 1);
+                else if (CommandTypes.IsOpener(t)) { result[i] = depth; depth++; }
+                else result[i] = depth;
+            }
+            return result;
+        }
+
+        /// <summary>RPGツクール風の1行表示（例：「◆文章：ラジオ「……聞こえるか」」）。</summary>
+        public static string CommandLine(IList<EventCommand> list, int index)
+        {
+            var c = list[index];
+            if (c == null) return "◆";
+            switch (c.type)
+            {
+                case CommandType.Message:
+                {
+                    string who = string.IsNullOrEmpty(c.speaker) ? "" : c.speaker + "：";
+                    string extra = (c.clip != null ? $"　♪{c.clip.name}" : "") + (c.target != null ? $"　◎{c.target.name}へ振り向く" : "");
+                    return $"◆文章：{who}{Short(c.text)}{extra}";
+                }
+                case CommandType.ShowChoices:
+                    return "◆選択肢の表示：" + string.Join(" ／ ", c.choices ?? new List<string>());
+                case CommandType.When:
+                {
+                    int p = ParentOpener(list, index);
+                    string label = p >= 0 && list[p].choices != null && c.choiceIndex < list[p].choices.Count ? list[p].choices[c.choiceIndex] : "?";
+                    return $"：［{label}］のとき";
+                }
+                case CommandType.EndChoices: return "：選択肢終了";
+                case CommandType.If: return "◆条件分岐：" + (c.condition != null ? ConditionText(c.condition) : "?");
+                case CommandType.Else: return "：それ以外のとき";
+                case CommandType.EndIf: return "：分岐終了";
+                case CommandType.GiveItem: return $"◆アイテム入手：{ItemName(c.itemId)}" + (c.silent ? "（通知なし）" : "");
+                case CommandType.RemoveItem: return $"◆アイテムを失う：{ItemName(c.itemId)}" + (c.silent ? "（通知なし）" : "");
+                case CommandType.SetFlag: return $"◆フラグ操作：{c.flagId} = {(c.boolValue ? "ON" : "OFF")}";
+                case CommandType.OpenDoor: return $"◆ドアを開ける：{Name(c.door)}";
+                case CommandType.CloseDoor: return $"◆ドアを閉める：{Name(c.door)}";
+                case CommandType.LockDoor: return $"◆ドアを施錠：{Name(c.door)}";
+                case CommandType.UnlockDoor: return $"◆ドアを解錠：{Name(c.door)}";
+                case CommandType.JumpScare: return $"◆ジャンプスケア：{Name(c.jumpScare)}";
+                case CommandType.PlaySound: return $"◆効果音：{Name(c.clip)}" + (c.target != null ? $"（{c.target.name}から）" : "") + (c.boolValue ? "・終わるまで待つ" : "");
+                case CommandType.LookAt: return $"◆視点を向ける：{Name(c.target)}（{c.duration:0.##}秒）";
+                case CommandType.FlickerFlashlight: return $"◆懐中電灯の明滅：{c.duration:0.##}秒";
+                case CommandType.FadeOut: return $"◆フェードアウト：{c.duration:0.##}秒";
+                case CommandType.FadeIn: return $"◆フェードイン：{c.duration:0.##}秒";
+                case CommandType.Wait: return $"◆ウェイト：{c.duration:0.##}秒";
+                case CommandType.SetActive: return $"◆表示切替：{Name(c.target)} を{(c.boolValue ? "表示" : "非表示")}";
+                case CommandType.EndEvent: return "◆イベント処理の中断";
+                case CommandType.CallEvent: return $"◆イベントの呼び出し：{(c.callEvent != null ? c.callEvent.DisplayName : "（未設定）")}";
+                case CommandType.CameraView: return $"◆視点変更：{c.duration:0.##}秒で切り替え" + (c.viewFov > 0f ? $"・画角{c.viewFov:0}" : "") + WaitText(c);
+                case CommandType.CameraReset: return $"◆視点変更解除：{c.duration:0.##}秒で通常視点へ" + WaitText(c);
+                case CommandType.CameraShake: return $"◆カメラシェイク：{c.duration:0.##}秒・強さ{c.strength:0.#}" + WaitText(c);
+                case CommandType.ActivateObject: return $"◆オブジェクトをアクティブ：{Name(c.target)}";
+                case CommandType.DeactivateObject: return $"◆オブジェクトを非アクティブ：{Name(c.target)}";
+                case CommandType.MoveObject: return $"◆オブジェクトを移動：{Name(c.target)} {Vec(c.vector)}m" + (c.localSpace ? "（自身の向き基準）" : "") + $"・{c.duration:0.##}秒" + WaitText(c);
+                case CommandType.RotateObject:
+                {
+                    string mode = c.rotateMode == RotateMode.Local ? "ローカル" : c.rotateMode == RotateMode.World ? "ワールド" : "加算";
+                    return $"◆オブジェクトを回転：{Name(c.target)} {mode}{Vec(c.vector)}・{c.duration:0.##}秒" + WaitText(c);
+                }
+                case CommandType.ScaleObject: return $"◆スケール変更：{Name(c.target)} → {Vec(c.vector)}・{c.duration:0.##}秒" + WaitText(c);
+                case CommandType.InvokeUnityEvent:
+                {
+                    int n = c.unityEvent != null ? c.unityEvent.GetPersistentEventCount() : 0;
+                    if (n == 0) return "◆UnityEventの実行：（未設定）";
+                    var first = c.unityEvent.GetPersistentTarget(0);
+                    string head = (first != null ? first.name : "?") + "." + c.unityEvent.GetPersistentMethodName(0);
+                    return $"◆UnityEventの実行：{head}" + (n > 1 ? $" ほか{n - 1}件" : "");
+                }
+                default: return "◆" + c.type;
+            }
+        }
+
+        static string WaitText(EventCommand c) => c.waitMode == WaitMode.Continue ? "（そのまま次へ）" : "（終了まで待機）";
+        static string Vec(Vector3 v) => $"({v.x:0.##}, {v.y:0.##}, {v.z:0.##})";
+
+        public static string ConditionText(EventCondition c)
+        {
+            switch (c.type)
+            {
+                case ConditionType.FlagOn: return $"フラグ {c.id} が ON";
+                case ConditionType.FlagOff: return $"フラグ {c.id} が OFF";
+                case ConditionType.HasItem: return $"{ItemName(c.id)} を持っている";
+                default: return $"{ItemName(c.id)} を持っていない";
+            }
+        }
+
+        public static Color CommandColor(CommandType t)
+        {
+            bool pro = EditorGUIUtility.isProSkin;
+            switch (t)
+            {
+                case CommandType.Message:
+                case CommandType.ShowChoices:
+                case CommandType.When:
+                case CommandType.EndChoices: return pro ? new Color(0.55f, 0.8f, 1f) : new Color(0.05f, 0.3f, 0.65f);
+                case CommandType.If:
+                case CommandType.Else:
+                case CommandType.EndIf:
+                case CommandType.CallEvent:
+                case CommandType.EndEvent:
+                case CommandType.InvokeUnityEvent:
+                case CommandType.Wait: return pro ? new Color(1f, 0.75f, 0.45f) : new Color(0.6f, 0.3f, 0f);
+                case CommandType.GiveItem:
+                case CommandType.RemoveItem:
+                case CommandType.SetFlag: return pro ? new Color(0.6f, 0.95f, 0.6f) : new Color(0.1f, 0.45f, 0.1f);
+                case CommandType.JumpScare:
+                case CommandType.PlaySound:
+                case CommandType.LookAt:
+                case CommandType.FlickerFlashlight:
+                case CommandType.FadeIn:
+                case CommandType.FadeOut:
+                case CommandType.CameraView:
+                case CommandType.CameraReset:
+                case CommandType.CameraShake: return pro ? new Color(1f, 0.55f, 0.55f) : new Color(0.65f, 0.1f, 0.1f);
+                case CommandType.ActivateObject:
+                case CommandType.DeactivateObject:
+                case CommandType.MoveObject:
+                case CommandType.RotateObject:
+                case CommandType.ScaleObject: return pro ? new Color(0.95f, 0.8f, 0.6f) : new Color(0.45f, 0.3f, 0.1f);
+                default: return pro ? new Color(0.85f, 0.85f, 0.85f) : new Color(0.15f, 0.15f, 0.15f);
+            }
+        }
+
         // ───────── 参照検索 ─────────
 
         /// <summary>シーン内でIDを参照している箇所（オブジェクト）を集める。</summary>
@@ -208,6 +369,8 @@ namespace HorrorKit.EditorTools
                         if (c == null) continue;
                         if (items && c.IsItemCommand) Add(c.itemId, ev.gameObject);
                         if (!items && c.type == CommandType.SetFlag) Add(c.flagId, ev.gameObject);
+                        if (c.type == CommandType.If && c.condition != null && c.condition.IsItemCondition == items)
+                            Add(c.condition.id, ev.gameObject);
                     }
                 }
             }
@@ -236,6 +399,8 @@ namespace HorrorKit.EditorTools
                     {
                         if (items && c.IsItemCommand && c.itemId == from) { c.itemId = to; count++; changed = true; }
                         if (!items && c.type == CommandType.SetFlag && c.flagId == from) { c.flagId = to; count++; changed = true; }
+                        if (c.type == CommandType.If && c.condition != null && c.condition.IsItemCondition == items && c.condition.id == from)
+                        { c.condition.id = to; count++; changed = true; }
                     }
                 }
                 if (changed) EditorUtility.SetDirty(ev);

@@ -162,6 +162,46 @@ namespace HorrorKit
             }
             var style = new GUIStyle(UnityEditor.EditorStyles.miniBoldLabel) { normal = { textColor = Gizmos.color } };
             UnityEditor.Handles.Label(labelPos, "◆ " + DisplayName, style);
+
+            // 振り向く先・音を鳴らす場所を線で示す
+            var lineColor = new Color(0.75f, 0.45f, 1f, 0.9f);
+            foreach (var p in pages)
+            {
+                if (p == null) continue;
+                foreach (var c in p.commands)
+                {
+                    if (c == null || c.target == null) continue;
+                    if (c.type != CommandType.Message && c.type != CommandType.LookAt && c.type != CommandType.PlaySound) continue;
+                    var to = c.target.transform.position;
+                    Gizmos.color = lineColor;
+                    Gizmos.DrawLine(labelPos, to);
+                    Gizmos.DrawWireSphere(to, 0.15f);
+                    var s = new GUIStyle(UnityEditor.EditorStyles.miniLabel) { normal = { textColor = lineColor } };
+                    UnityEditor.Handles.Label(to + Vector3.up * 0.25f, c.type == CommandType.PlaySound ? "♪ 音" : "◎ 振り向く先", s);
+                }
+            }
+        }
+
+        // 選択中は「視点変更」のカメラ位置を枠で示す
+        void OnDrawGizmosSelected()
+        {
+            var camColor = new Color(1f, 0.85f, 0.2f, 0.9f);
+            int n = 0;
+            foreach (var p in pages)
+            {
+                if (p == null) continue;
+                foreach (var c in p.commands)
+                {
+                    if (c == null || c.type != CommandType.CameraView) continue;
+                    n++;
+                    Gizmos.color = camColor;
+                    Gizmos.matrix = Matrix4x4.TRS(c.viewPosition, Quaternion.Euler(c.viewRotation), Vector3.one);
+                    Gizmos.DrawFrustum(Vector3.zero, c.viewFov > 0f ? c.viewFov : 60f, 1.2f, 0.05f, 16f / 9f);
+                    Gizmos.matrix = Matrix4x4.identity;
+                    var s = new GUIStyle(UnityEditor.EditorStyles.miniBoldLabel) { normal = { textColor = camColor } };
+                    UnityEditor.Handles.Label(c.viewPosition + Vector3.up * 0.2f, $"▣ 視点{n}", s);
+                }
+            }
         }
 #endif
     }

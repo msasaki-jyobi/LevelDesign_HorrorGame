@@ -31,12 +31,88 @@ namespace HorrorKit
         [InspectorName("ドア/解錠")] UnlockDoor = 7,
         [InspectorName("演出/ジャンプスケア")] JumpScare = 8,
         [InspectorName("演出/効果音")] PlaySound = 9,
+        [InspectorName("演出/視点を向ける（振り返る）")] LookAt = 16,
         [InspectorName("演出/懐中電灯を明滅")] FlickerFlashlight = 10,
         [InspectorName("演出/フェードアウト")] FadeOut = 11,
         [InspectorName("演出/フェードイン")] FadeIn = 12,
         [InspectorName("制御/待機")] Wait = 13,
-        [InspectorName("制御/オブジェクト表示切替")] SetActive = 14,
+        [InspectorName("制御/オブジェクト表示切替（ON/OFF指定）")] SetActive = 14,
         [InspectorName("制御/イベント終了")] EndEvent = 15,
+
+        [InspectorName("カメラ/視点変更")] CameraView = 24,
+        [InspectorName("カメラ/視点変更解除")] CameraReset = 25,
+        [InspectorName("カメラ/カメラシェイク")] CameraShake = 31,
+        [InspectorName("オブジェクト/アクティブにする")] ActivateObject = 26,
+        [InspectorName("オブジェクト/非アクティブにする")] DeactivateObject = 27,
+        [InspectorName("オブジェクト/移動")] MoveObject = 28,
+        [InspectorName("オブジェクト/回転")] RotateObject = 29,
+        [InspectorName("オブジェクト/スケール変更")] ScaleObject = 30,
+        [InspectorName("制御/UnityEventの実行")] InvokeUnityEvent = 32,
+
+        // ── フロー制御（イベントエディタから挿入する。ブロックの印は自動で管理される）──
+        [InspectorName("フロー/条件分岐")] If = 17,
+        [InspectorName("フロー/それ以外のとき")] Else = 18,
+        [InspectorName("フロー/分岐終了")] EndIf = 19,
+        [InspectorName("会話/選択肢の表示")] ShowChoices = 20,
+        [InspectorName("会話/［選択肢］のとき")] When = 21,
+        [InspectorName("会話/選択肢終了")] EndChoices = 22,
+        [InspectorName("フロー/別のイベントを実行")] CallEvent = 23,
+    }
+
+    /// <summary>時間のかかるコマンドの「次に進める条件」</summary>
+    public enum WaitMode
+    {
+        [InspectorName("そのまま次へ")] Continue = 0,
+        [InspectorName("終了するまで待機")] WaitForEnd = 1,
+    }
+
+    /// <summary>オブジェクトの回転の指定方法</summary>
+    public enum RotateMode
+    {
+        [InspectorName("ローカル回転値を指定")] Local = 0,
+        [InspectorName("ワールド回転値を指定")] World = 1,
+        [InspectorName("今の回転に加算")] Add = 2,
+    }
+
+    public static class CommandTypes
+    {
+        /// <summary>「次に進める条件」を持つコマンド</summary>
+        public static bool HasWaitMode(CommandType t) =>
+            t == CommandType.CameraView || t == CommandType.CameraReset || t == CommandType.CameraShake
+            || t == CommandType.MoveObject || t == CommandType.RotateObject || t == CommandType.ScaleObject;
+
+        /// <summary>ブロックの開始（条件分岐・選択肢）</summary>
+        public static bool IsOpener(CommandType t) => t == CommandType.If || t == CommandType.ShowChoices;
+        /// <summary>ブロックの終了</summary>
+        public static bool IsCloser(CommandType t) => t == CommandType.EndIf || t == CommandType.EndChoices;
+        /// <summary>ブロック内の区切り（それ以外のとき・［選択肢］のとき）</summary>
+        public static bool IsDivider(CommandType t) => t == CommandType.Else || t == CommandType.When;
+        /// <summary>開始・区切り・終了のいずれか（自動管理される行）</summary>
+        public static bool IsStructural(CommandType t) => IsOpener(t) || IsCloser(t) || IsDivider(t);
+
+        /// <summary>
+        /// from から同じ階層を順に見て、isTarget に当たる行か、このブロックの終了行の位置を返す。
+        /// 入れ子のブロックは飛ばす。見つからなければ cmds.Count。
+        /// </summary>
+        public static int ScanLevel(IList<EventCommand> cmds, int from, Func<CommandType, bool> isTarget)
+        {
+            int depth = 0;
+            for (int i = from; i < cmds.Count; i++)
+            {
+                var t = cmds[i] != null ? cmds[i].type : CommandType.Wait;
+                if (depth == 0 && (IsCloser(t) || (isTarget != null && isTarget(t)))) return i;
+                if (IsOpener(t)) depth++;
+                else if (IsCloser(t)) depth--;
+            }
+            return cmds.Count;
+        }
+
+        /// <summary>start が開始行のとき、対応する終了行の位置を返す。開始行でなければ start。</summary>
+        public static int BlockEnd(IList<EventCommand> cmds, int start)
+        {
+            if (start < 0 || start >= cmds.Count || cmds[start] == null || !IsOpener(cmds[start].type)) return start;
+            return Math.Min(ScanLevel(cmds, start + 1, null), cmds.Count - 1);
+        }
     }
 
     [Serializable]
@@ -73,9 +149,36 @@ namespace HorrorKit
         public bool silent;
         public Door door;
         public JumpScare jumpScare;
+        [Tooltip("会話：表示と同時に鳴らす音（声・効果音）／効果音：鳴らす音")]
         public AudioClip clip;
         [Min(0f)] public float duration = 1f;
+        [Tooltip("会話：振り向く先（音もここから鳴る）／効果音：鳴らす場所／視点を向ける：向く先／表示切替：対象")]
         public GameObject target;
+        [Tooltip("条件分岐の条件")]
+        public EventCondition condition = new EventCondition();
+        [Tooltip("選択肢の文言（2〜4個）")]
+        public List<string> choices = new List<string> { "はい", "いいえ" };
+        [Tooltip("［選択肢］のとき：何番目の選択肢か（0始まり）")]
+        public int choiceIndex;
+        [Tooltip("別のイベントを実行：実行するイベント")]
+        public HorrorEvent callEvent;
+
+        [Tooltip("時間のかかるコマンド：次に進める条件")]
+        public WaitMode waitMode = WaitMode.WaitForEnd;
+        [Tooltip("移動：移動量(m)／回転：角度／スケール：大きさ")]
+        public Vector3 vector;
+        [Tooltip("移動：オブジェクトの向きを基準にする")]
+        public bool localSpace;
+        public RotateMode rotateMode;
+        [Tooltip("視点変更：カメラの位置")]
+        public Vector3 viewPosition;
+        [Tooltip("視点変更：カメラの向き")]
+        public Vector3 viewRotation;
+        [Tooltip("視点変更：画角（0 ならプレイヤーと同じ）")]
+        public float viewFov;
+        [Tooltip("カメラシェイク：強さ")]
+        public float strength = 1f;
+        public UnityEngine.Events.UnityEvent unityEvent = new UnityEngine.Events.UnityEvent();
 
         public bool IsItemCommand => type == CommandType.GiveItem || type == CommandType.RemoveItem;
     }

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>コンセプトシート｜夜の旧校舎 ― 保健室へ</title>
+<style>
+  :root {
+    --ink: #1c2124;
+    --sub: #5b666c;
+    --line: #d5dbdf;
+    --soft: #f4f6f7;
+    --teal: #1f3b3a;
+    --moss: #3f5a4f;
+    --fluor: #9fb8a8;
+    --moon: #c9d6d2;
+    --red: #9b2226;
+    --red-soft: #f8e9e9;
+    --wood: #3a2a1e;
+    --gold: #b8860b;
+  }
+  @page {
+    size: A4;
+    margin: 14mm 14mm 16mm;
+    @bottom-center { content: counter(page) " / " counter(pages); font-size: 8.5pt; color: #9aa4aa; }
+    @bottom-left { content: "レベルデザイン演習｜夜の旧校舎 ― 保健室へ"; font-size: 8pt; color: #b0b8bd; }
+  }
+  @page :first { margin: 0; @bottom-center { content: none; } @bottom-left { content: none; } }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    font-family: "Yu Gothic UI", "Yu Gothic", "游ゴシック体", "Meiryo", sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.7;
+    color: var(--ink);
+    background: #e9ecee;
+  }
+  .page {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 10mm auto;
+    padding: 14mm 14mm 16mm;
+    background: #fff;
+    box-shadow: 0 2px 10px rgba(0,0,0,.12);
+    break-after: page;
+  }
+  @media print {
+    body { background: #fff; font-size: 9.6pt; line-height: 1.55; }
+    .page { margin: 0; box-shadow: none; width: auto; min-height: auto; padding: 0; }
+    .page.cover { min-height: 297mm; }
+    h2 { font-size: 15pt; margin-bottom: 3.5mm; }
+    h3 { font-size: 11pt; margin: 3.5mm 0 1.5mm; }
+    p { margin-bottom: 1.8mm; }
+    table { font-size: 8.8pt; margin: 1mm 0 3mm; }
+    th, td { padding: 0.9mm 1.6mm; }
+    .card { padding: 2mm 3mm; font-size: 9pt; }
+    .note { padding: 2mm 3mm; margin: 1.5mm 0 3mm; font-size: 9pt; }
+    .chips { margin-bottom: 2mm; }
+    .sw i { height: 9mm; }
+    svg[aria-label="緊張カーブ"] { height: 50mm; }
+    .map-wrap svg { height: 140mm; }
+    .timeline > div { padding: 1.1mm 2.5mm; }
+    .level { padding: 2mm 3mm; font-size: 9pt; }
+    .art { margin-bottom: 3.5mm; }
+    .gridpaper { height: 150mm; }
+    #beat table { font-size: 8.2pt; line-height: 1.45; }
+    #beat .note { font-size: 8.5pt; }
+    #beat .card { font-size: 8.3pt; line-height: 1.45; padding: 1.5mm 2.5mm; }
+    #beat .card h4 { font-size: 9.5pt; margin-bottom: 0.8mm; }
+    #beat .grid3 { gap: 2.5mm; }
+    #plan h3 { margin: 2.5mm 0 1mm; }
+    #plan .bar { margin-bottom: 2.5mm; }
+    #plan .timeline > div { padding: 0.8mm 2.5mm; font-size: 8.7pt; }
+    #plan .level { font-size: 8.4pt; line-height: 1.4; }
+    #plan .level ul { margin-bottom: 0; }
+    #plan table { font-size: 8.2pt; margin-bottom: 2mm; }
+    #plan .check { font-size: 8.7pt; margin-bottom: 1mm; }
+    #plan .check li { margin: 0; }
+  }
+  h1, h2, h3 { line-height: 1.3; }
+  h2 {
+    font-size: 17pt;
+    margin: 0 0 5mm;
+    padding-bottom: 2mm;
+    border-bottom: 3px solid var(--teal);
+    display: flex; align-items: baseline; gap: 3mm;
+  }
+  h2 .no { font-size: 10pt; color: #fff; background: var(--teal); padding: 0.5mm 2.5mm; border-radius: 3px; letter-spacing: .05em; }
+  h3 { font-size: 12pt; margin: 5mm 0 2mm; padding-left: 2.5mm; border-left: 4px solid var(--red); break-after: avoid; }
+  p { margin: 0 0 2.5mm; }
+  ul, ol { margin: 0 0 3mm; padding-left: 5.5mm; }
+  li { margin: .5mm 0; }
+  table { border-collapse: collapse; width: 100%; margin: 1.5mm 0 4mm; font-size: 9.6pt; break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: 1.3mm 2mm; text-align: left; vertical-align: top; }
+  th { background: var(--soft); white-space: nowrap; }
+  img { display: block; max-width: 100%; }
+  .small { font-size: 9pt; color: var(--sub); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; }
+  .card { border: 1px solid var(--line); border-radius: 5px; padding: 3mm 4mm; background: #fff; break-inside: avoid; }
+  .card h4 { margin: 0 0 1.5mm; font-size: 10.5pt; color: var(--teal); }
+  .note { border-left: 4px solid var(--teal); background: var(--soft); padding: 2.5mm 4mm; border-radius: 4px; margin: 2mm 0 4mm; font-size: 10pt; break-inside: avoid; }
+  .note.red { border-color: var(--red); background: var(--red-soft); }
+  .note b.label { display: block; color: var(--teal); margin-bottom: .5mm; }
+  .note.red b.label { color: var(--red); }
+
+  /* 表紙 */
+  .cover {
+    position: relative;
+    padding: 0;
+    overflow: hidden;
+    background: #0d1213;
+    color: #e7ecea;
+    display: flex; flex-direction: column;
+  }
+  .cover .hero { position: relative; height: 165mm; overflow: hidden; }
+  .cover .hero img { width: 100%; height: 100%; object-fit: cover; }
+  .cover .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(13,18,19,0) 55%, #0d1213 100%); }
+  .cover .body { padding: 6mm 16mm 14mm; flex: 1; display: flex; flex-direction: column; }
+  .cover .kicker { letter-spacing: .35em; font-size: 9.5pt; color: var(--fluor); margin-bottom: 3mm; }
+  .cover h1 { font-size: 30pt; margin: 0 0 3mm; font-weight: 700; color: #fff; }
+  .cover h1 small { display: block; font-size: 13pt; font-weight: 400; color: #b9c6c2; margin-top: 2mm; letter-spacing: .1em; }
+  .cover .logline { font-size: 11.5pt; color: #d5dcd9; border-left: 3px solid var(--red); padding-left: 4mm; margin: 4mm 0 7mm; }
+  .cover .facts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin-top: auto; }
+  .cover .fact { border: 1px solid #2b3a3a; border-radius: 4px; padding: 2.5mm 3mm; background: rgba(255,255,255,.03); }
+  .cover .fact b { display: block; font-size: 8pt; color: #8fa39c; font-weight: 400; letter-spacing: .1em; }
+  .cover .fact span { font-size: 11pt; color: #fff; }
+  .cover .name { margin-top: 6mm; font-size: 9.5pt; color: #8fa39c; display: flex; gap: 10mm; }
+  .cover .name span { flex: 1; border-bottom: 1px solid #3a4848; padding-bottom: 1mm; }
+
+  /* キーワード・パレット */
+  .chips { display: flex; flex-wrap: wrap; gap: 2mm; margin: 1mm 0 3mm; }
+  .chip { border: 1px solid var(--line); border-radius: 20px; padding: .3mm 3mm; font-size: 9.5pt; background: var(--soft); }
+  .chip.ng { text-decoration: line-through; color: #8a949a; background: #fff; }
+  .palette { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2mm; margin: 1mm 0 3mm; }
+  .sw { border-radius: 4px; overflow: hidden; border: 1px solid var(--line); font-size: 8pt; break-inside: avoid; }
+  .sw i { display: block; height: 12mm; }
+  .sw div { padding: 1mm 1.5mm; line-height: 1.35; }
+  .sw b { display: block; font-size: 8.5pt; }
+
+  figure { margin: 0 0 4mm; break-inside: avoid; }
+  figure img { border-radius: 4px; border: 1px solid #c9d0d4; }
+  figcaption { font-size: 8.8pt; color: var(--sub); margin-top: 1mm; }
+  .art { display: grid; grid-template-columns: 1.25fr 1fr; gap: 4mm; align-items: start; margin-bottom: 5mm; break-inside: avoid; }
+  .art .txt h4 { margin: 0 0 1.5mm; font-size: 11pt; display: flex; align-items: center; gap: 2mm; }
+  .art .txt ul { font-size: 9.6pt; }
+  .beatno {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 6mm; height: 6mm; border-radius: 50%; background: var(--red); color: #fff; font-size: 9pt; font-weight: 700; flex: 0 0 auto;
+  }
+  .ld { font-size: 9pt; background: #fff8e6; border: 1px solid #f0dfb0; border-radius: 4px; padding: 1.5mm 2.5mm; margin-top: 1.5mm; }
+  .ld b { color: #8a6100; }
+
+  /* 地図 */
+  .map-wrap { border: 1px solid var(--line); border-radius: 5px; padding: 2mm; background: #fbfcfc; }
+  .legend { display: flex; flex-wrap: wrap; gap: 1.5mm 5mm; font-size: 8.8pt; color: var(--sub); margin-top: 1.5mm; }
+  .legend span { display: inline-flex; align-items: center; gap: 1.2mm; }
+  .legend i { display: inline-block; width: 6mm; height: 2.2mm; border-radius: 1px; }
+
+  /* タイムライン */
+  .timeline { display: grid; grid-template-columns: 22mm 1fr; border: 1px solid var(--line); border-radius: 5px; overflow: hidden; break-inside: avoid; }
+  .timeline > div { padding: 2mm 3mm; border-bottom: 1px solid var(--line); }
+  .timeline > div:nth-last-child(-n+2) { border-bottom: none; }
+  .timeline .t { background: var(--teal); color: #fff; font-weight: 700; font-size: 9.5pt; text-align: center; }
+  .timeline .d b { color: var(--teal); }
+  .bar { display: flex; height: 6mm; border-radius: 3px; overflow: hidden; margin: 1mm 0 4mm; font-size: 7.8pt; color: #fff; }
+  .bar div { display: flex; align-items: center; justify-content: center; white-space: nowrap; }
+
+  .level { border-radius: 5px; padding: 3mm 4mm; break-inside: avoid; }
+  .level h4 { margin: 0 0 1.5mm; font-size: 11pt; }
+  .lv1 { background: #f3efe9; border: 1px solid #dccfbf; }
+  .lv1 h4 { color: #7a5a35; }
+  .lv2 { background: #eef1f3; border: 1px solid #cfd8de; }
+  .lv2 h4 { color: #52626c; }
+  .lv3 { background: #fbf5e3; border: 1px solid #ead9a5; }
+  .lv3 h4 { color: var(--gold); }
+
+  .check { list-style: none; padding-left: 0; }
+  .check li { padding-left: 6mm; position: relative; }
+  .check li::before { content: ""; position: absolute; left: 0; top: 1.3mm; width: 3.4mm; height: 3.4mm; border: 1.3px solid var(--sub); border-radius: 2px; }
+  .memo { border: 1px dashed #b9c2c7; border-radius: 4px; min-height: 26mm; padding: 2mm 3mm; color: #a0a9ae; font-size: 9pt; }
+  .gridpaper {
+    height: 120mm; border: 1px solid #b9c2c7; border-radius: 3px;
+    background-color: #fff;
+    background-image:
+      linear-gradient(#e3e8eb 1px, transparent 1px),
+      linear-gradient(90deg, #e3e8eb 1px, transparent 1px),
+      linear-gradient(#c4ccd1 1px, transparent 1px),
+      linear-gradient(90deg, #c4ccd1 1px, transparent 1px);
+    background-size: 4mm 4mm, 4mm 4mm, 20mm 20mm, 20mm 20mm;
+  }
+</style>
+</head>
+<body>
+
+<!-- ======================= 表紙 ======================= -->
+<section class="page cover">
+  <div class="hero"><img src="images/key_art.png" alt="キーアート：夜の旧校舎の廊下"></div>
+  <div class="body">
+    <div class="kicker">LEVEL DESIGN WORKSHOP ／ HORROR BLOCKOUT</div>
+    <h1>夜の旧校舎 ― 保健室へ<small>コンセプトシート ＆ コンセプトアート</small></h1>
+    <div class="logline">目を覚ますと、夜の旧校舎の教室にいた。<br>廊下の奥、鍵のかかった保健室にたどり着かなければ、ここからは出られない。</div>
+    <div class="facts">
+      <div class="fact"><b>制作時間</b><span>120分</span></div>
+      <div class="fact"><b>作るもの</b><span>エリア1つ</span></div>
+      <div class="fact"><b>手法</b><span>ブロックアウト</span></div>
+      <div class="fact"><b>プレイ時間の目安</b><span>3〜5分</span></div>
+    </div>
+    <div class="name"><span>学籍番号：</span><span>氏名：</span></div>
+  </div>
+</section>
+
+<!-- ======================= 1. コンセプト ======================= -->
+<section class="page">
+  <h2><span class="no">01</span>コンセプト</h2>
+
+  <div class="grid2">
+    <div>
+      <h3>どんなエリア？</h3>
+      <table>
+        <tr><th>舞台</th><td>山あいの廃校になった木造旧校舎、2階。夜。</td></tr>
+        <tr><th>視点</th><td>一人称。武器なし。懐中電灯だけ。</td></tr>
+        <tr><th>目的</th><td>教室で目覚め → 鍵を見つけ → 保健室に入る</td></tr>
+        <tr><th>空間</th><td>教室・北廊下・準備室・曲がり角（東廊下）・保健室 の5空間</td></tr>
+        <tr><th>長さ</th><td>迷わず歩いて3〜5分。<br>一度ゴールの扉を見て → 鍵を取りに戻る → 同じ道を引き返す</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>プレイヤーに感じてほしいこと</h3>
+      <p><b>「静かすぎる学校は、こんなにも怖い」</b></p>
+      <ul>
+        <li>知っているはずの場所（学校）が、夜になると知らない場所に見える</li>
+        <li>何も起きない時間が長いほど、何かが起きる予感が強くなる</li>
+        <li>鍵を手に入れて安心した<b>帰り道</b>で、一番怖いことが起きる</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>ムードキーワード</h3>
+  <div class="chips">
+    <span class="chip">静寂</span><span class="chip">ノスタルジー</span><span class="chip">孤独</span><span class="chip">ちらつく蛍光灯</span><span class="chip">月明かり</span><span class="chip">木の床のきしみ</span><span class="chip">見えない角の先</span><span class="chip">赤い非常灯</span>
+  </div>
+  <p class="small">やらないこと（このエリアの雰囲気に合わない）：</p>
+  <div class="chips">
+    <span class="chip ng">血まみれ・ゴア表現</span><span class="chip ng">大量の敵</span><span class="chip ng">広すぎる空間</span><span class="chip ng">迷路</span><span class="chip ng">明るい照明</span>
+  </div>
+
+  <h3>カラーパレット</h3>
+  <div class="palette">
+    <div class="sw"><i style="background:#16201f"></i><div><b>闇</b>#16201F<br>影・天井</div></div>
+    <div class="sw"><i style="background:#1f3b3a"></i><div><b>夜気</b>#1F3B3A<br>全体の空気</div></div>
+    <div class="sw"><i style="background:#3a2a1e"></i><div><b>古木</b>#3A2A1E<br>床・腰壁</div></div>
+    <div class="sw"><i style="background:#9fb8a8"></i><div><b>蛍光灯</b>#9FB8A8<br>誘導の光</div></div>
+    <div class="sw"><i style="background:#c9d6d2"></i><div><b>月光</b>#C9D6D2<br>窓から差す光</div></div>
+    <div class="sw"><i style="background:#9b2226"></i><div><b>非常灯</b>#9B2226<br>ゴールの目印だけ</div></div>
+  </div>
+  <div class="note red"><b class="label">色のルール</b>赤い<b>光</b>は<b>ゴール（保健室）の目印だけ</b>に使う。ほかの場所で赤を使うと、プレイヤーが「どこへ行けばいいか」を見失います。</div>
+
+  <h3>体験の流れ（緊張カーブ）</h3>
+  <svg viewBox="0 0 640 210" width="100%" role="img" aria-label="緊張カーブ">
+    <defs>
+      <linearGradient id="tg" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0" stop-color="#9b2226" stop-opacity=".35"/>
+        <stop offset="1" stop-color="#1f3b3a" stop-opacity=".04"/>
+      </linearGradient>
+    </defs>
+    <line x1="40" y1="170" x2="620" y2="170" stroke="#9aa4aa"/>
+    <line x1="40" y1="20" x2="40" y2="170" stroke="#9aa4aa"/>
+    <text x="10" y="28" font-size="11" fill="#5b666c">緊張</text>
+    <text x="582" y="190" font-size="11" fill="#5b666c">時間 →</text>
+    <path d="M60,128 C110,120 130,110 160,108 C200,105 230,92 260,86 C300,80 320,112 360,114 C400,116 430,40 470,30 C500,24 520,80 560,92 C580,98 600,120 615,140 L615,170 L60,170 Z" fill="url(#tg)"/>
+    <path d="M60,128 C110,120 130,110 160,108 C200,105 230,92 260,86 C300,80 320,112 360,114 C400,116 430,40 470,30 C500,24 520,80 560,92 C580,98 600,120 615,140" fill="none" stroke="#9b2226" stroke-width="2.5"/>
+    <g font-size="11" fill="#1c2124">
+      <circle cx="70" cy="126" r="9" fill="#9b2226"/><text x="66" y="130" fill="#fff" font-weight="700">1</text><text x="58" y="105">目覚め</text>
+      <circle cx="160" cy="108" r="9" fill="#9b2226"/><text x="156" y="112" fill="#fff" font-weight="700">2</text><text x="148" y="90">誘導</text>
+      <circle cx="260" cy="86" r="9" fill="#9b2226"/><text x="256" y="90" fill="#fff" font-weight="700">3</text><text x="246" y="68">放送</text>
+      <circle cx="360" cy="114" r="9" fill="#9b2226"/><text x="356" y="118" fill="#fff" font-weight="700">4</text><text x="340" y="140">鍵（安堵）</text>
+      <circle cx="470" cy="30" r="9" fill="#9b2226"/><text x="466" y="34" fill="#fff" font-weight="700">5</text><text x="486" y="34" font-weight="700" fill="#9b2226">恐怖のピーク</text>
+      <circle cx="575" cy="100" r="9" fill="#9b2226"/><text x="571" y="104" fill="#fff" font-weight="700">6</text><text x="528" y="128">保健室へ</text>
+    </g>
+  </svg>
+  <p class="small">ポイント：④で一度ほっとさせてから⑤で落とす。「緊張 → 小さな解放 → 最大の恐怖 → 解放」の波を作る。</p>
+</section>
+
+<!-- ======================= 2. エリア構成（平面図） ======================= -->
+<section class="page">
+  <h2><span class="no">02</span>エリア構成（平面図）</h2>
+  <p>1マス＝<b>1m</b>。寸法は目安です（±20%まで変えてよい）。<b>部屋の並び順とビート①〜⑥の場所は変えない</b>こと。</p>
+
+  <div class="map-wrap">
+    <svg viewBox="0 0 620 520" width="100%" role="img" aria-label="エリア平面図">
+      <defs>
+        <pattern id="g1" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0 L0 0 0 20" fill="none" stroke="#e6ebee" stroke-width="1"/></pattern>
+        <pattern id="g5" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M100 0 L0 0 0 100" fill="none" stroke="#cdd5da" stroke-width="1"/></pattern>
+        <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#8a949a" stroke-width="2"/></pattern>
+        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9b2226"/></marker>
+        <marker id="arrB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3f7f8f"/></marker>
+      </defs>
+      <g transform="translate(20,20)">
+        <rect x="0" y="0" width="580" height="480" fill="url(#g1)"/>
+        <rect x="0" y="0" width="580" height="480" fill="url(#g5)"/>
+
+        <!-- 部屋 (1m = 20px) -->
+        <rect x="40" y="40" width="180" height="140" fill="#e4ece9" stroke="#1f3b3a" stroke-width="3"/>
+        <rect x="280" y="100" width="80" height="80" fill="#efe9df" stroke="#1f3b3a" stroke-width="3"/>
+        <rect x="40" y="180" width="440" height="50" fill="#f3f5f6" stroke="#1f3b3a" stroke-width="3"/>
+        <rect x="480" y="180" width="60" height="50" fill="url(#hatch)" stroke="#1f3b3a" stroke-width="3"/>
+        <rect x="430" y="230" width="50" height="130" fill="#f3f5f6" stroke="#1f3b3a" stroke-width="3"/>
+        <rect x="380" y="360" width="150" height="110" fill="#f6e7e7" stroke="#1f3b3a" stroke-width="3"/>
+
+        <!-- 窓（破線） -->
+        <line x1="50" y1="40" x2="210" y2="40" stroke="#7fa7c9" stroke-width="5" stroke-dasharray="14 6"/>
+        <line x1="50" y1="230" x2="420" y2="230" stroke="#7fa7c9" stroke-width="5" stroke-dasharray="14 6"/>
+
+        <!-- 黒板 -->
+        <rect x="40" y="70" width="6" height="70" fill="#2f4f45"/>
+        <!-- 扉 -->
+        <line x1="172" y1="180" x2="196" y2="180" stroke="#f3f5f6" stroke-width="5"/>
+        <line x1="172" y1="180" x2="196" y2="180" stroke="#2e7d32" stroke-width="4"/>
+        <line x1="60" y1="180" x2="84" y2="180" stroke="#8a949a" stroke-width="5"/>
+        <text x="64" y="176" font-size="13" fill="#5b666c" font-weight="700">✕</text>
+        <line x1="308" y1="180" x2="332" y2="180" stroke="#2e7d32" stroke-width="4"/>
+        <line x1="443" y1="360" x2="467" y2="360" stroke="#9b2226" stroke-width="5"/>
+
+        <!-- 机（教室） -->
+        <g fill="#c6cfcc">
+          <rect x="100" y="70" width="12" height="9"/><rect x="130" y="70" width="12" height="9"/><rect x="160" y="74" width="12" height="9" transform="rotate(20 166 78)"/>
+          <rect x="100" y="100" width="12" height="9" transform="rotate(-30 106 104)"/><rect x="134" y="112" width="12" height="9"/><rect x="165" y="105" width="12" height="9"/>
+          <rect x="105" y="140" width="12" height="9" transform="rotate(50 111 144)"/><rect x="160" y="145" width="12" height="9"/>
+          <rect x="56" y="160" width="34" height="14" fill="#9aa4aa"/>
+        </g>
+        <!-- 準備室の机・棚 -->
+        <rect x="300" y="120" width="30" height="16" fill="#b9a68c"/>
+        <rect x="284" y="104" width="10" height="70" fill="#b9a68c"/>
+        <!-- 保健室のベッド -->
+        <g fill="#e2c9c9"><rect x="392" y="380" width="22" height="40"/><rect x="392" y="425" width="22" height="40"/><rect x="498" y="380" width="22" height="40"/></g>
+        <!-- 階段バリケード -->
+        <g fill="#7b858a"><rect x="486" y="190" width="14" height="10"/><rect x="505" y="200" width="14" height="10"/><rect x="490" y="210" width="16" height="10"/></g>
+
+        <!-- 照明 -->
+        <g>
+          <circle cx="120" cy="205" r="6" fill="#d8e8c8" stroke="#6f8f6f"/>
+          <circle cx="240" cy="205" r="6" fill="#d8e8c8" stroke="#6f8f6f"/>
+          <circle cx="380" cy="205" r="8" fill="#e8f5c8" stroke="#9b8f20" stroke-width="2"/>
+          <path d="M372 196 l-6 -6 M388 196 l6 -6 M380 194 v-8" stroke="#9b8f20" stroke-width="1.5"/>
+          <circle cx="455" cy="290" r="6" fill="#d8e8c8" stroke="#6f8f6f"/>
+          <circle cx="455" cy="352" r="7" fill="#9b2226"/>
+          <circle cx="312" cy="128" r="5" fill="#f2b45c"/>
+        </g>
+        <!-- スピーカー（曲がり角） -->
+        <rect x="448" y="181" width="14" height="8" fill="#1c2124"/>
+        <!-- 恐怖トリガー -->
+        <rect x="430" y="232" width="50" height="28" fill="#e9a23b" fill-opacity=".3" stroke="#d48a1a" stroke-dasharray="4 3"/>
+        <!-- 人影の出現位置 -->
+        <ellipse cx="467" cy="335" rx="9" ry="6" fill="#1c2124"/>
+        <line x1="467" y1="328" x2="467" y2="272" stroke="#1c2124" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+
+        <!-- 動線：行き（施錠を確認して準備室へ）／帰り（鍵を持って保健室へ） -->
+        <polyline points="130,110 184,175 184,198 444,198 444,340" fill="none" stroke="#3f7f8f" stroke-width="2.2" stroke-dasharray="6 4"/>
+        <polyline points="436,340 436,212 314,212 314,148" fill="none" stroke="#3f7f8f" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#arrB)"/>
+        <polyline points="326,148 326,205 460,205 460,418" fill="none" stroke="#9b2226" stroke-width="2.8" marker-end="url(#arr)"/>
+        <text x="420" y="347" font-size="12" font-weight="700" fill="#9b2226">✕</text>
+
+        <!-- 部屋名 -->
+        <g font-size="13" font-weight="700" fill="#1f3b3a">
+          <text x="120" y="62">2-A 教室</text>
+          <text x="286" y="96">理科準備室</text>
+          <text x="60" y="222">北廊下（幅2.5m）</text>
+          <text x="486" y="246" font-size="11">階段（封鎖）</text>
+          <text x="398" y="490" fill="#9b2226">保健室（ゴール）</text>
+          <text x="488" y="300" font-size="11">東廊下</text>
+        </g>
+        <!-- 寸法 -->
+        <g font-size="10.5" fill="#5b666c">
+          <text x="110" y="34">9m</text>
+          <text x="20" y="115" transform="rotate(-90 20 115)">7m</text>
+          <text x="366" y="118">4×4m</text>
+          <text x="245" y="250">22m</text>
+          <text x="488" y="318">6.5m</text>
+          <text x="500" y="490">7.5×5.5m</text>
+        </g>
+
+        <!-- ビート番号 -->
+        <g font-size="12" font-weight="700" fill="#fff">
+          <circle cx="130" cy="110" r="11" fill="#9b2226"/><text x="126" y="115">1</text>
+          <circle cx="380" cy="166" r="11" fill="#9b2226"/><text x="376" y="171">2</text>
+          <circle cx="430" cy="166" r="11" fill="#9b2226"/><text x="426" y="171">3</text>
+          <circle cx="345" cy="150" r="11" fill="#9b2226"/><text x="341" y="155">4</text>
+          <circle cx="505" cy="262" r="11" fill="#9b2226"/><text x="501" y="267">5</text>
+          <circle cx="425" cy="378" r="11" fill="#9b2226"/><text x="421" y="383">6</text>
+        </g>
+
+        <!-- 方位・スケール -->
+        <g transform="translate(545,20)">
+          <path d="M0,22 L8,0 L16,22 L8,16 Z" fill="#1f3b3a"/><text x="4" y="36" font-size="11" fill="#1f3b3a">N</text>
+        </g>
+        <g transform="translate(20,465)">
+          <rect x="0" y="0" width="100" height="6" fill="#1f3b3a"/><rect x="20" y="0" width="20" height="6" fill="#fff"/><rect x="60" y="0" width="20" height="6" fill="#fff"/>
+          <text x="104" y="7" font-size="10.5" fill="#5b666c">5m</text>
+        </g>
+      </g>
+    </svg>
+    <div class="legend">
+      <span><i style="background:#2e7d32"></i>開いている扉</span>
+      <span><i style="background:#9b2226"></i>施錠扉（保健室）</span>
+      <span><i style="background:#8a949a"></i>封鎖（机で塞ぐ）</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#7fa7c9 0 6px,transparent 6px 8px)"></i>窓</span>
+      <span><i style="background:#2f4f45"></i>黒板</span>
+      <span><i style="background:#1c2124"></i>スピーカー</span>
+      <span><i style="background:#e9a23b;opacity:.6"></i>恐怖トリガー範囲</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#3f7f8f 0 6px,transparent 6px 10px)"></i>行き（扉が施錠 → 準備室へ）</span>
+      <span><i style="background:#9b2226"></i>帰り（鍵を持って保健室へ）</span>
+    </div>
+  </div>
+
+  <h3>空間ごとの寸法と役割</h3>
+  <table>
+    <tr><th>空間</th><th>寸法の目安</th><th>役割</th><th>レベルデザインの狙い</th></tr>
+    <tr><td><b>2-A 教室</b></td><td>9 × 7m</td><td>スタート</td><td>後ろの扉を机で塞ぎ、前の扉だけを開けて出口を1つに絞る</td></tr>
+    <tr><td><b>北廊下</b></td><td>幅2.5 × 長さ22m</td><td>誘導・溜め</td><td>長い直線で「奥」を見せる。ちらつく蛍光灯で奥へ引っぱる</td></tr>
+    <tr><td><b>理科準備室</b></td><td>4 × 4m</td><td>寄り道・鍵</td><td>狭くて圧迫感。机の上だけ暖色のランプで鍵を目立たせる</td></tr>
+    <tr><td><b>曲がり角／東廊下</b></td><td>幅2.5 × 長さ6.5m</td><td>ゴールを見せる／恐怖のピーク</td><td>1回目は何も起きない、2回目に起きる。階段を封鎖して逃げ道をなくす</td></tr>
+    <tr><td><b>保健室</b></td><td>7.5 × 5.5m</td><td>ゴール</td><td>東廊下の突き当たりに扉。曲がり角を曲がった瞬間、正面に赤い非常灯が見えるようにする</td></tr>
+  </table>
+</section>
+
+<!-- ======================= 3. ビートシート ======================= -->
+<section class="page" id="beat">
+  <h2><span class="no">03</span>ビートシート（何が・どこで・どう起きるか）</h2>
+  <p>ビート＝プレイヤーの体験の区切り。<b>①〜⑥の順番はこのエリアの「物語」</b>です。HorrorKit を使う場合の作り方も書いてあります（ブロックアウトだけの人は「空間で表現すること」を優先）。</p>
+  <table>
+    <tr><th style="width:15%">ビート</th><th style="width:30%">起きること</th><th style="width:27%">空間で表現すること</th><th>HorrorKit での作り方</th></tr>
+    <tr><td><b>① 目覚め</b><br><span class="small">2-A 教室</span></td>
+        <td>暗転から目を覚ます。黒板に「保健室へ」という書き込み（矢印）。</td>
+        <td>机を乱雑に。前の扉だけ開いていて、外の緑の光が漏れる。</td>
+        <td>空オブジェクトに<b>自動実行</b>イベント（フェード＋独白）。黒板に<b>調べる</b>イベント → フラグ <code>read_board</code> ON</td></tr>
+    <tr><td><b>② 誘導</b><br><span class="small">北廊下</span></td>
+        <td>長い廊下。奥の蛍光灯だけがちらついている。</td>
+        <td>直線で奥まで見通せる。照明の間隔を空け、暗い区間を作る。</td>
+        <td>奥の照明に <b>FlickerLight</b>（Blackout Chance 高め）</td></tr>
+    <tr><td><b>③ 放送</b><br><span class="small">曲がり角</span></td>
+        <td>角を曲がると正面に保健室の赤い光。扉は施錠されている。角のスピーカーから「……準備室……」と声。</td>
+        <td>スピーカーは角の高い位置に。ここで一度ゴールを見せる（まだ何も起きない）。</td>
+        <td>保健室の<b>ドア</b>（Locked）で施錠メッセージ。スピーカーに2ページのイベント：P1 ノイズ／P2 条件 <code>read_board</code> ON・一度だけ・話者「放送」</td></tr>
+    <tr><td><b>④ 鍵</b><br><span class="small">理科準備室</span></td>
+        <td>机の上に古い鍵とメモ。ほっとする瞬間。</td>
+        <td>狭い部屋。机の上だけ暖色の光（安心の色）。</td>
+        <td>机に<b>調べる</b>イベント（条件 <code>read_board</code>）：アイテム入手 <code>infirmary_key</code>＋鍵の見た目を非表示</td></tr>
+    <tr><td><b>⑤ 恐怖</b><br><span class="small">曲がり角</span></td>
+        <td>鍵を持って<b>さっき安全だった</b>曲がり角に戻ると、保健室の前に人影が立っていて、迫ってくる。</td>
+        <td>角で視界を切る。階段は机で封鎖（逃げられない）。</td>
+        <td><b>エリアイベント</b>（条件 <code>infirmary_key</code> 所持・一度だけ）→ <b>ジャンプスケア</b> → フラグ <code>saw_shadow</code></td></tr>
+    <tr><td><b>⑥ 保健室へ</b><br><span class="small">保健室</span></td>
+        <td>赤い非常灯の下の施錠扉を鍵で開ける。中に入ると暗転して終了。</td>
+        <td>赤い光は東廊下の入口から見えること（ランドマーク）。</td>
+        <td><b>ドア</b>（Locked・Key Item = <code>infirmary_key</code>）。室内に<b>エリアイベント</b>でフェードアウト＋メッセージ</td></tr>
+  </table>
+
+  <div class="grid2">
+    <div class="note"><b class="label">使うアイテムとフラグ（HorrorKit で登録する ID）</b>
+      アイテム：<code>infirmary_key</code>（保健室の鍵）<br>
+      フラグ：<code>read_board</code>（黒板を見た）、<code>saw_shadow</code>（人影を見た）
+    </div>
+    <div class="note red"><b class="label">よくある失敗</b>
+      ⑤を行きの道で起こしてしまう。③で「何も起きなかった場所」に、<b>鍵を持って戻ったとき</b>に起きるから怖い。エリアイベントの条件「鍵を所持」を忘れずに。
+    </div>
+  </div>
+
+  <h3>守ってほしいレベルデザインの基本</h3>
+  <div class="grid3">
+    <div class="card"><h4>光で誘導する</h4>行ってほしい場所を明るく、行かなくていい場所を暗く。プレイヤーは光に向かって歩く。</div>
+    <div class="card"><h4>見せてから取り上げる</h4>ゴールを一度見せるが、扉は開かない。「行きたいのに行けない」が目的を生み、同じ場所に戻る理由になる。</div>
+    <div class="card"><h4>狭い↔広いの変化</h4>廊下（狭い）→ 教室（広い）→ 準備室（もっと狭い）。幅の変化がリズムを作る。</div>
+    <div class="card"><h4>出口は1つに見せる</h4>封鎖（机のバリケード）で「ここは通れない」をはっきり見せる。透明な壁は使わない。</div>
+    <div class="card"><h4>スケールを守る</h4>こまめにプレイヤーで歩いて確認。広すぎる廊下は怖くない。</div>
+    <div class="card"><h4>何も起きない時間</h4>全部の場所で何かを起こさない。静かな区間があるから⑤が効く。</div>
+  </div>
+</section>
+
+<!-- ======================= 4. コンセプトアート ======================= -->
+<section class="page">
+  <h2><span class="no">04</span>コンセプトアート</h2>
+  <p>アートは「雰囲気と構図」の参考です。細部（テクスチャ・小物）はブロックアウトでは作りません。<b>形・スケール・光の位置</b>を読み取ってください。</p>
+
+  <div class="art">
+    <figure><img src="images/start_classroom.png" alt="2-A 教室"><figcaption>2-A 教室（スタート）</figcaption></figure>
+    <div class="txt">
+      <h4><span class="beatno">1</span>目覚めの教室</h4>
+      <ul>
+        <li>倒れた机が「何かあった」ことを語る</li>
+        <li>黒板の矢印が、最初の目的を示す</li>
+        <li>前の扉の外に緑の光、後ろの扉は机で塞がれている</li>
+      </ul>
+      <div class="ld"><b>読み取るポイント：</b>窓からの月光（青白）と、扉の外の光（緑）の2つの光源。出口の扉の方を明るく。</div>
+    </div>
+  </div>
+
+  <div class="art">
+    <figure><img src="images/key_art.png" alt="北廊下"><figcaption>北廊下（キーアート）</figcaption></figure>
+    <div class="txt">
+      <h4><span class="beatno">2</span>北廊下</h4>
+      <ul>
+        <li>片側に教室の引き戸、反対側に大きな窓</li>
+        <li>真ん中の蛍光灯だけが点いている（ちらつく）</li>
+        <li>突き当たりの奥に、かすかな赤い光</li>
+      </ul>
+      <div class="ld"><b>読み取るポイント：</b>消失点に向かう一点透視の構図。廊下はまっすぐ・天井は低め（3m）で圧迫感を出す。</div>
+    </div>
+  </div>
+
+  <div class="art">
+    <figure><img src="images/prep_room.png" alt="理科準備室"><figcaption>理科準備室</figcaption></figure>
+    <div class="txt">
+      <h4><span class="beatno">4</span>理科準備室</h4>
+      <ul>
+        <li>棚と標本瓶でぎっしり。通路は1人分</li>
+        <li>机の上だけ暖色のランプ → 鍵とメモ</li>
+        <li>隅の人体模型は「見間違い」を誘う</li>
+      </ul>
+      <div class="ld"><b>読み取るポイント：</b>暖色の光＝安心と報酬。ブロックアウトでも Point Light をオレンジにして机の上に置く。</div>
+    </div>
+  </div>
+</section>
+
+<section class="page">
+  <div class="art">
+    <figure><img src="images/corner_scare.png" alt="曲がり角"><figcaption>曲がり角／東廊下</figcaption></figure>
+    <div class="txt">
+      <h4><span class="beatno">3</span><span class="beatno">5</span>曲がり角</h4>
+      <ul>
+        <li>角の高い位置に古い放送スピーカー（③）</li>
+        <li>下り階段は机と椅子のバリケードで封鎖</li>
+        <li>奥の突き当たりに保健室の赤い光</li>
+        <li>鍵を持って戻ったときだけ、髪の長い人影（⑤）</li>
+      </ul>
+      <div class="ld"><b>読み取るポイント：</b>角を曲がるまで先が見えない配置。人影は東廊下の<b>突き当たり＝保健室の扉の手前</b>（プレイヤーから5〜6m）に置くと、ゴールの赤い光と一緒に目に入る。</div>
+    </div>
+  </div>
+
+  <div class="art">
+    <figure><img src="images/infirmary_door.png" alt="保健室の扉"><figcaption>保健室の扉（ゴール）</figcaption></figure>
+    <div class="txt">
+      <h4><span class="beatno">6</span>保健室</h4>
+      <ul>
+        <li>扉の上に赤い非常灯 → ゴールの目印</li>
+        <li>すりガラス越しにカーテンとベッドの影</li>
+        <li>扉には鎖と南京錠（鍵が必要だと一目でわかる）</li>
+      </ul>
+      <div class="ld"><b>読み取るポイント：</b>このエリアで唯一の「赤」。床に赤い光が反射するよう、扉の手前の床を少し広く取る。</div>
+    </div>
+  </div>
+
+  <h3>ブロックアウトの完成イメージ</h3>
+  <div class="art">
+    <figure><img src="images/blockout_ref.png" alt="ブロックアウトの例"><figcaption>ブロックアウトの例（北廊下）</figcaption></figure>
+    <div class="txt">
+      <h4>今日のゴールはこの状態</h4>
+      <ul>
+        <li>テクスチャなし・グレーの箱だけ</li>
+        <li>壁・床・天井・扉・窓・机が<b>形として</b>わかる</li>
+        <li>光は「仮置き」：白（蛍光灯）・オレンジ（ランプ）・赤（ゴール）</li>
+        <li>プレイヤーで歩けて、スケールが正しい</li>
+      </ul>
+      <div class="ld"><b>やらなくていいこと：</b>モデルの作り込み、テクスチャ、小物の配置、音。時間が余ったらギミックへ。</div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 5. ブロックアウトのルール ======================= -->
+<section class="page">
+  <h2><span class="no">05</span>ブロックアウトのルールと寸法</h2>
+
+  <h3>寸法の基準（HorrorKit のプレイヤーに合わせた値）</h3>
+  <table>
+    <tr><th>もの</th><th>寸法</th><th>メモ</th></tr>
+    <tr><td>プレイヤーの身長／目の高さ</td><td>1.75m ／ 1.63m</td><td>しゃがむと 1.1m</td></tr>
+    <tr><td>調べられる距離</td><td>2.2m</td><td>机の奥行きなどはこれより短く</td></tr>
+    <tr><td>天井の高さ</td><td>3m</td><td>廊下は 2.7〜3m。高すぎると怖くない</td></tr>
+    <tr><td>廊下の幅</td><td>2.5m</td><td>2m 以下は窮屈すぎ、3.5m 以上は開放的すぎ</td></tr>
+    <tr><td>扉（引き戸）</td><td>幅1.2m × 高さ2.2m</td><td>HorrorKit「ドア」の標準サイズ</td></tr>
+    <tr><td>壁の厚さ</td><td>0.2m</td><td>Cube の Scale で調整</td></tr>
+    <tr><td>窓</td><td>下端0.9m・高さ1.5m</td><td>開口部として壁を分割するか、薄い板で表現</td></tr>
+    <tr><td>机／椅子</td><td>0.6×0.45×高さ0.7m ／ 0.4×0.4×高さ0.45m</td><td>Cube 1つで十分</td></tr>
+  </table>
+
+  <div class="grid2">
+    <div>
+      <h3>ルール</h3>
+      <ul>
+        <li>使ってよいのは <b>Cube・Plane・ProBuilder の基本形状</b>だけ</li>
+        <li>マテリアルは<b>グレー系＋色分け3色まで</b>（例：床・壁・ゴール）</li>
+        <li>すべての床・壁に <b>Collider</b>（プレイヤーが落ちない・すり抜けない）</li>
+        <li>Hierarchy は空間ごとにまとめる<br><span class="small">例：Environment / Room_Classroom, Corridor_North …</span></li>
+        <li>スタートからゴールまで<b>実際に歩いて</b>通れること</li>
+      </ul>
+    </div>
+    <div>
+      <h3>はじめ方</h3>
+      <ol>
+        <li>新しいシーンを作り、<code>Assets/_Project/Scenes/</code> に保存</li>
+        <li>メニュー <b>HorrorKit → セットアップ → プレイヤー一式を配置</b></li>
+        <li>同じく <b>ライティング・フォグ・ポストプロセスを適用</b><br><span class="small">（暗すぎて作業しにくいときは Scene ビューの照明ボタンをオフ）</span></li>
+        <li>床（Plane）を置いてから、平面図の通りに壁を立てる</li>
+      </ol>
+    </div>
+  </div>
+  <div class="note"><b class="label">こまめに歩こう</b>壁を数枚立てたら▶再生してプレイヤーで歩く。「思ったより広い／狭い」はエディタ上ではわかりません。</div>
+</section>
+
+<!-- ======================= 6. 120分の進め方 ======================= -->
+<section class="page" id="plan">
+  <h2><span class="no">06</span>120分の進め方と提出</h2>
+
+  <div class="bar">
+    <div style="flex:10;background:#5b666c">読解</div>
+    <div style="flex:15;background:#3f5a4f">平面図</div>
+    <div style="flex:45;background:#1f3b3a">ブロックアウト</div>
+    <div style="flex:20;background:#7a5a35">歩いて調整</div>
+    <div style="flex:20;background:#9b2226">光・ギミック</div>
+    <div style="flex:10;background:#16201f">提出</div>
+  </div>
+  <div class="timeline">
+    <div class="t">0–10分</div><div class="d"><b>読む</b>：このシートを読み、①〜⑥の流れを理解する。わからないことはここで質問。</div>
+    <div class="t">10–25分</div><div class="d"><b>紙に描く</b>：最終ページの方眼に、自分の平面図を描く（寸法を書き込む）。</div>
+    <div class="t">25–70分</div><div class="d"><b>ブロックアウト</b>：床 → 外壁 → 部屋の仕切り → 扉の穴 → 封鎖 → 机などの大きな物の順に作る。</div>
+    <div class="t">70–90分</div><div class="d"><b>歩いて調整</b>：プレイヤーで何度も歩き、幅・長さ・見通しを直す。ゴールの赤い光が見える位置を確認。</div>
+    <div class="t">90–110分</div><div class="d"><b>光とギミック</b>：照明を仮置き（白・オレンジ・赤）。余裕があれば HorrorKit でドアやイベントを入れる。</div>
+    <div class="t">110–120分</div><div class="d"><b>提出</b>：セルフチェックをして、シーンとスクリーンショットを提出。</div>
+  </div>
+
+  <h3>課題のレベル</h3>
+  <div class="grid3">
+    <div class="level lv1"><h4>ブロンズ（必須）</h4>
+      <ul><li>5つの空間をブロックアウト</li><li>寸法がおおむね基準どおり</li><li>スタート〜ゴールを歩ける</li><li>封鎖で道が1本に見える</li></ul></div>
+    <div class="level lv2"><h4>シルバー（目標）</h4>
+      <ul><li>照明の仮置きで導線ができている</li><li>ゴールの赤い光が東廊下の入口から見える</li><li>HorrorKit のドアを置く</li></ul></div>
+    <div class="level lv3"><h4>ゴールド（挑戦）</h4>
+      <ul><li>ビート①〜⑥を HorrorKit で動かす</li><li>鍵 → 施錠扉 → ジャンプスケアが一通り動く</li><li>FlickerLight で廊下を演出</li></ul></div>
+  </div>
+
+  <h3>提出物</h3>
+  <table>
+    <tr><th>もの</th><th>内容</th></tr>
+    <tr><td>シーン</td><td><code>Area_学籍番号_氏名.unity</code>（<code>Assets/_Project/Scenes/</code> に保存）</td></tr>
+    <tr><td>スクリーンショット 3枚</td><td>①教室のスタート視点　②北廊下を奥に向かって見た視点　③東廊下から保健室の扉を見た視点</td></tr>
+    <tr><td>ひとこと</td><td>「一番工夫したところ」と「時間があればやりたかったこと」を1行ずつ</td></tr>
+  </table>
+
+  <h3>セルフチェック</h3>
+  <div class="grid2">
+    <ul class="check">
+      <li>スタートからゴールまで、引っかからずに歩ける</li>
+      <li>落ちる場所・すり抜ける壁がない</li>
+      <li>廊下の幅・天井の高さが基準に近い</li>
+      <li>後ろの扉と階段が「通れない」と見てわかる</li>
+    </ul>
+    <ul class="check">
+      <li>赤い光はゴールにだけ使っている</li>
+      <li>北廊下の奥が明るく、行き先がわかる</li>
+      <li>曲がり角で先が見えなくなっている</li>
+      <li>Hierarchy が空間ごとに整理されている</li>
+    </ul>
+  </div>
+
+  <h3>評価の観点</h3>
+  <table>
+    <tr><th>観点</th><th>見るところ</th><th>配点</th></tr>
+    <tr><td>構成</td><td>5つの空間とビートの場所がコンセプトどおりか</td><td>30</td></tr>
+    <tr><td>スケール</td><td>プレイヤーに対して寸法が自然か（広すぎ・狭すぎがないか）</td><td>25</td></tr>
+    <tr><td>導線と見せ方</td><td>光・封鎖・見通しで、迷わず進めるか。曲がり角の「見えない不安」</td><td>25</td></tr>
+    <tr><td>雰囲気</td><td>照明の仮置きでコンセプトアートの空気が出ているか</td><td>20</td></tr>
+    <tr><td>加点</td><td>HorrorKit のギミック（ゴールド課題）</td><td>＋10</td></tr>
+  </table>
+</section>
+
+<!-- ======================= 7. 作業用紙 ======================= -->
+<section class="page">
+  <h2><span class="no">07</span>作業用紙（平面図を描こう）</h2>
+  <p class="small">細い線＝1m、太い線＝5m。部屋の寸法・扉の位置・ビート番号①〜⑥・照明の位置を描き込む。</p>
+  <div class="gridpaper"></div>
+  <h3>メモ（気づいたこと・工夫したいこと）</h3>
+  <div class="memo">例：曲がり角の手前の照明を消して、角の先をもっと暗くしたい</div>
+</section>
+
+</body>
+</html>

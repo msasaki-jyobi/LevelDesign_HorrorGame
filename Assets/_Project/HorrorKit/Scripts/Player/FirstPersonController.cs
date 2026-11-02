@@ -162,6 +162,13 @@ namespace HorrorKit
             float k = 1f - Mathf.Exp(-4f * dt);
             noise.AmplitudeGain = Mathf.Lerp(noise.AmplitudeGain, amp, k);
             noise.FrequencyGain = Mathf.Lerp(noise.FrequencyGain, freq, k);
+            // イベントのカメラシェイク
+            float shake = EventCamera.ShakeAmplitude;
+            if (shake > 0f)
+            {
+                noise.AmplitudeGain = Mathf.Max(noise.AmplitudeGain, amp + shake);
+                noise.FrequencyGain = Mathf.Max(noise.FrequencyGain, 3f);
+            }
         }
 
         void UpdateFootsteps(float dt)

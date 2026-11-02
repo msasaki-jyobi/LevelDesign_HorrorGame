@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>課題シート｜夜の旧校舎 ― 保健室へ</title>
+<style>
+  :root {
+    --ink: #1c2124; --sub: #5b666c; --line: #d5dbdf; --soft: #f4f6f7;
+    --teal: #1f3b3a; --red: #9b2226; --red-soft: #f8e9e9;
+  }
+  @page { size: A4; margin: 11mm 12mm 12mm; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    margin: 0;
+    font-family: "Yu Gothic UI", "Yu Gothic", "游ゴシック体", "Meiryo", sans-serif;
+    font-size: 10pt; line-height: 1.55; color: var(--ink); background: #e9ecee;
+  }
+  .page {
+    width: 210mm; min-height: 297mm; margin: 10mm auto; padding: 11mm 12mm 12mm;
+    background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.12); break-after: page;
+  }
+  @media print {
+    body { background: #fff; }
+    .page { margin: 0; box-shadow: none; width: auto; min-height: auto; padding: 0; }
+  }
+  h1 { margin: 0; font-size: 19pt; line-height: 1.25; }
+  h2 {
+    font-size: 11.5pt; margin: 3.5mm 0 1.5mm; padding: 0.6mm 0 0.6mm 2.5mm;
+    border-left: 4px solid var(--red); break-after: avoid;
+  }
+  p { margin: 0 0 1.5mm; }
+  ul, ol { margin: 0; padding-left: 5mm; }
+  table { border-collapse: collapse; width: 100%; font-size: 9.2pt; }
+  th, td { border: 1px solid var(--line); padding: 0.9mm 2mm; text-align: left; vertical-align: top; }
+  th { background: var(--soft); white-space: nowrap; }
+  .small { font-size: 8.6pt; color: var(--sub); }
+
+  /* 表面ヘッダー */
+  .head { display: grid; grid-template-columns: 1fr 72mm; gap: 4mm; align-items: stretch; }
+  .head .title { display: flex; flex-direction: column; justify-content: space-between; }
+  .kicker { font-size: 8pt; letter-spacing: .25em; color: var(--sub); margin-bottom: 1mm; }
+  .logline { border-left: 3px solid var(--red); padding-left: 3mm; color: #3a4448; font-size: 9.6pt; margin: 2mm 0; }
+  .head img { width: 100%; height: 40mm; object-fit: cover; border-radius: 4px; display: block; }
+  .name { display: flex; gap: 4mm; font-size: 8.6pt; color: var(--sub); }
+  .name span { flex: 1; border-bottom: 1px solid #b9c2c7; padding-bottom: .5mm; }
+  .mission {
+    margin: 3mm 0 0; padding: 2.5mm 4mm; border-radius: 5px;
+    background: var(--teal); color: #fff; font-size: 10.5pt;
+    display: flex; gap: 4mm; align-items: center;
+  }
+  .mission b { font-size: 9pt; background: #fff; color: var(--teal); border-radius: 3px; padding: 0.3mm 2mm; white-space: nowrap; }
+
+  .map-wrap { border: 1px solid var(--line); border-radius: 5px; padding: 1.5mm; background: #fbfcfc; }
+  .map-wrap svg { width: 100%; height: 140mm; display: block; }
+  .legend { display: flex; flex-wrap: wrap; gap: 1mm 4mm; font-size: 8pt; color: var(--sub); margin-top: 1mm; }
+  .legend span { display: inline-flex; align-items: center; gap: 1.2mm; }
+  .legend i { display: inline-block; width: 6mm; height: 2.2mm; border-radius: 1px; }
+
+  .flow { display: grid; grid-template-columns: 1fr 1fr; gap: 1.8mm 4mm; }
+  .flow div { display: flex; gap: 2.2mm; align-items: flex-start; font-size: 9.6pt; line-height: 1.45; }
+  .flow .peak { color: var(--red); font-weight: 700; }
+  .n {
+    flex: 0 0 auto; width: 5.6mm; height: 5.6mm; border-radius: 50%;
+    background: var(--red); color: #fff; font-size: 8.5pt; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center; margin-top: .3mm;
+  }
+  .flow small { display: block; color: var(--sub); font-size: 8.4pt; }
+
+  /* 裏面 */
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .bar { display: flex; height: 7mm; border-radius: 3px; overflow: hidden; font-size: 8pt; color: #fff; }
+  .bar div { display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.15; white-space: nowrap; }
+  .bar div small { font-size: 6.8pt; opacity: .85; }
+  .levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5mm; }
+  .lv { border-radius: 5px; padding: 2mm 3mm; font-size: 9pt; line-height: 1.45; }
+  .lv h3 { margin: 0 0 1mm; font-size: 10pt; }
+  .lv1 { background: #f3efe9; border: 1px solid #dccfbf; } .lv1 h3 { color: #7a5a35; }
+  .lv2 { background: #eef1f3; border: 1px solid #cfd8de; } .lv2 h3 { color: #52626c; }
+  .lv3 { background: #fbf5e3; border: 1px solid #ead9a5; } .lv3 h3 { color: #a07400; }
+  .check { list-style: none; padding: 0; margin: 0; font-size: 9.4pt; }
+  .check li { position: relative; padding-left: 5.5mm; margin: .5mm 0; }
+  .check li::before { content: ""; position: absolute; left: 0; top: 1.1mm; width: 3.2mm; height: 3.2mm; border: 1.2px solid var(--sub); border-radius: 2px; }
+  .rule { background: var(--red-soft); border-left: 4px solid var(--red); border-radius: 4px; padding: 2mm 3.5mm; font-size: 9.4pt; }
+  .arts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2.5mm; }
+  .arts figure { margin: 0; }
+  .arts img { width: 100%; height: 33mm; object-fit: cover; border-radius: 3px; display: block; }
+  .arts figcaption { font-size: 8.2pt; color: var(--sub); margin-top: .5mm; display: flex; gap: 1.5mm; align-items: center; }
+  .arts .n { width: 4.6mm; height: 4.6mm; font-size: 7.5pt; margin: 0; }
+  .foot { margin-top: 3mm; font-size: 8.4pt; color: var(--sub); border-top: 1px solid var(--line); padding-top: 1.5mm; }
+</style>
+</head>
+<body>
+
+<!-- ===================== 表：何を作るか ===================== -->
+<section class="page">
+  <div class="head">
+    <div class="title">
+      <div>
+        <div class="kicker">LEVEL DESIGN WORKSHOP ／ 学生用シート</div>
+        <h1>夜の旧校舎 ― 保健室へ</h1>
+        <div class="logline">目を覚ますと、夜の旧校舎の教室にいた。<br>鍵のかかった保健室にたどり着かなければ、ここからは出られない。</div>
+      </div>
+      <div class="name"><span>学籍番号：</span><span>氏名：</span></div>
+    </div>
+    <img src="images/key_art.png" alt="キーアート">
+  </div>
+
+  <div class="mission"><b>今日の課題</b><span>教室から保健室までのエリアを、<strong>グレーの箱だけ</strong>で作る（ブロックアウト・120分）</span></div>
+
+  <h2>平面図（1マス＝1m）</h2>
+  <div class="map-wrap">
+    <svg viewBox="0 0 620 520" width="100%" role="img" aria-label="エリア平面図">
+      <defs>
+        <pattern id="g1" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0 L0 0 0 20" fill="none" stroke="#e6ebee" stroke-width="1"/></pattern>
+        <pattern id="g5" width="100" height="100" patternUnits="userSpaceOnUse"><path d="M100 0 L0 0 0 100" fill="none" stroke="#cdd5da" stroke-width="1"/></pattern>
+        <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#8a949a" stroke-width="2"/></pattern>
+        <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9b2226"/></marker>
+        <marker id="arrB" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#3f7f8f"/></marker>
+      </defs>
+      <g transform="translate(20,20)">
+        <rect x="0" y="0" width="580" height="480" fill="url(#g1)"/>
+        <rect x="0" y="0" width="580" height="480" fill="url(#g5)"/>
+
+        <!-- 部屋 (1m = 20px) -->
+        <rect x="40" y="40" width="180" height="140" fill="#e4ece9" stroke="#1f3b3a" stroke-width="3"/>
+        <rect x="280" y="100" width="80" height="80" fill="#efe9df" stroke="#1f3b3a" stroke-width="3"/>
+        <rect x="40" y="180" width="440" height="50" fill="#f3f5f6" stroke="#1f3b3a" stroke-width="3"/>
+        <rect x="480" y="180" width="60" height="50" fill="url(#hatch)" stroke="#1f3b3a" stroke-width="3"/>
+        <rect x="430" y="230" width="50" height="130" fill="#f3f5f6" stroke="#1f3b3a" stroke-width="3"/>
+        <rect x="380" y="360" width="150" height="110" fill="#f6e7e7" stroke="#1f3b3a" stroke-width="3"/>
+
+        <!-- 窓（破線） -->
+        <line x1="50" y1="40" x2="210" y2="40" stroke="#7fa7c9" stroke-width="5" stroke-dasharray="14 6"/>
+        <line x1="50" y1="230" x2="420" y2="230" stroke="#7fa7c9" stroke-width="5" stroke-dasharray="14 6"/>
+
+        <!-- 黒板 -->
+        <rect x="40" y="70" width="6" height="70" fill="#2f4f45"/>
+        <!-- 扉 -->
+        <line x1="172" y1="180" x2="196" y2="180" stroke="#f3f5f6" stroke-width="5"/>
+        <line x1="172" y1="180" x2="196" y2="180" stroke="#2e7d32" stroke-width="4"/>
+        <line x1="60" y1="180" x2="84" y2="180" stroke="#8a949a" stroke-width="5"/>
+        <text x="64" y="176" font-size="13" fill="#5b666c" font-weight="700">✕</text>
+        <line x1="308" y1="180" x2="332" y2="180" stroke="#2e7d32" stroke-width="4"/>
+        <line x1="443" y1="360" x2="467" y2="360" stroke="#9b2226" stroke-width="5"/>
+
+        <!-- 机（教室） -->
+        <g fill="#c6cfcc">
+          <rect x="100" y="70" width="12" height="9"/><rect x="130" y="70" width="12" height="9"/><rect x="160" y="74" width="12" height="9" transform="rotate(20 166 78)"/>
+          <rect x="100" y="100" width="12" height="9" transform="rotate(-30 106 104)"/><rect x="134" y="112" width="12" height="9"/><rect x="165" y="105" width="12" height="9"/>
+          <rect x="105" y="140" width="12" height="9" transform="rotate(50 111 144)"/><rect x="160" y="145" width="12" height="9"/>
+          <rect x="56" y="160" width="34" height="14" fill="#9aa4aa"/>
+        </g>
+        <!-- 準備室の机・棚 -->
+        <rect x="300" y="120" width="30" height="16" fill="#b9a68c"/>
+        <rect x="284" y="104" width="10" height="70" fill="#b9a68c"/>
+        <!-- 保健室のベッド -->
+        <g fill="#e2c9c9"><rect x="392" y="380" width="22" height="40"/><rect x="392" y="425" width="22" height="40"/><rect x="498" y="380" width="22" height="40"/></g>
+        <!-- 階段バリケード -->
+        <g fill="#7b858a"><rect x="486" y="190" width="14" height="10"/><rect x="505" y="200" width="14" height="10"/><rect x="490" y="210" width="16" height="10"/></g>
+
+        <!-- 照明 -->
+        <g>
+          <circle cx="120" cy="205" r="6" fill="#d8e8c8" stroke="#6f8f6f"/>
+          <circle cx="240" cy="205" r="6" fill="#d8e8c8" stroke="#6f8f6f"/>
+          <circle cx="380" cy="205" r="8" fill="#e8f5c8" stroke="#9b8f20" stroke-width="2"/>
+          <path d="M372 196 l-6 -6 M388 196 l6 -6 M380 194 v-8" stroke="#9b8f20" stroke-width="1.5"/>
+          <circle cx="455" cy="290" r="6" fill="#d8e8c8" stroke="#6f8f6f"/>
+          <circle cx="455" cy="352" r="7" fill="#9b2226"/>
+          <circle cx="312" cy="128" r="5" fill="#f2b45c"/>
+        </g>
+        <!-- スピーカー（曲がり角） -->
+        <rect x="448" y="181" width="14" height="8" fill="#1c2124"/>
+        <!-- 恐怖トリガー -->
+        <rect x="430" y="232" width="50" height="28" fill="#e9a23b" fill-opacity=".3" stroke="#d48a1a" stroke-dasharray="4 3"/>
+        <!-- 人影の出現位置 -->
+        <ellipse cx="467" cy="335" rx="9" ry="6" fill="#1c2124"/>
+        <line x1="467" y1="328" x2="467" y2="272" stroke="#1c2124" stroke-width="1.5" stroke-dasharray="3 3" marker-end="url(#arr)"/>
+
+        <!-- 動線：行き（施錠を確認して準備室へ）／帰り（鍵を持って保健室へ） -->
+        <polyline points="130,110 184,175 184,198 444,198 444,340" fill="none" stroke="#3f7f8f" stroke-width="2.2" stroke-dasharray="6 4"/>
+        <polyline points="436,340 436,212 314,212 314,148" fill="none" stroke="#3f7f8f" stroke-width="2.2" stroke-dasharray="6 4" marker-end="url(#arrB)"/>
+        <polyline points="326,148 326,205 460,205 460,418" fill="none" stroke="#9b2226" stroke-width="2.8" marker-end="url(#arr)"/>
+        <text x="420" y="347" font-size="12" font-weight="700" fill="#9b2226">✕</text>
+
+        <!-- 部屋名 -->
+        <g font-size="13" font-weight="700" fill="#1f3b3a">
+          <text x="120" y="62">2-A 教室</text>
+          <text x="286" y="96">理科準備室</text>
+          <text x="60" y="222">北廊下（幅2.5m）</text>
+          <text x="486" y="246" font-size="11">階段（封鎖）</text>
+          <text x="398" y="490" fill="#9b2226">保健室（ゴール）</text>
+          <text x="488" y="300" font-size="11">東廊下</text>
+        </g>
+        <!-- 寸法 -->
+        <g font-size="10.5" fill="#5b666c">
+          <text x="110" y="34">9m</text>
+          <text x="20" y="115" transform="rotate(-90 20 115)">7m</text>
+          <text x="366" y="118">4×4m</text>
+          <text x="245" y="250">22m</text>
+          <text x="488" y="318">6.5m</text>
+          <text x="500" y="490">7.5×5.5m</text>
+        </g>
+
+        <!-- ビート番号 -->
+        <g font-size="12" font-weight="700" fill="#fff">
+          <circle cx="130" cy="110" r="11" fill="#9b2226"/><text x="126" y="115">1</text>
+          <circle cx="380" cy="166" r="11" fill="#9b2226"/><text x="376" y="171">2</text>
+          <circle cx="430" cy="166" r="11" fill="#9b2226"/><text x="426" y="171">3</text>
+          <circle cx="345" cy="150" r="11" fill="#9b2226"/><text x="341" y="155">4</text>
+          <circle cx="505" cy="262" r="11" fill="#9b2226"/><text x="501" y="267">5</text>
+          <circle cx="425" cy="378" r="11" fill="#9b2226"/><text x="421" y="383">6</text>
+        </g>
+
+        <!-- 方位・スケール -->
+        <g transform="translate(545,20)">
+          <path d="M0,22 L8,0 L16,22 L8,16 Z" fill="#1f3b3a"/><text x="4" y="36" font-size="11" fill="#1f3b3a">N</text>
+        </g>
+        <g transform="translate(20,465)">
+          <rect x="0" y="0" width="100" height="6" fill="#1f3b3a"/><rect x="20" y="0" width="20" height="6" fill="#fff"/><rect x="60" y="0" width="20" height="6" fill="#fff"/>
+          <text x="104" y="7" font-size="10.5" fill="#5b666c">5m</text>
+        </g>
+      </g>
+    </svg>
+    <div class="legend">
+      <span><i style="background:#2e7d32"></i>開いている扉</span>
+      <span><i style="background:#9b2226"></i>鍵のかかった扉</span>
+      <span><i style="background:#8a949a"></i>通れない（机で塞ぐ）</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#7fa7c9 0 6px,transparent 6px 8px)"></i>窓</span>
+      <span><i style="background:#e9a23b;opacity:.6"></i>⑤が起きる場所</span>
+      <span><i style="background:repeating-linear-gradient(90deg,#3f7f8f 0 6px,transparent 6px 10px)"></i>行き</span>
+      <span><i style="background:#9b2226"></i>帰り（鍵を持って）</span>
+    </div>
+  </div>
+  <p class="small" style="margin-top:1mm">寸法は目安（±20%まで変えてOK）。<b>部屋の並びと①〜⑥の場所は変えない。</b></p>
+
+  <h2>プレイの流れ</h2>
+  <div class="flow">
+    <div><span class="n">1</span><span>教室で目を覚ます<small>黒板に「保健室へ」の書き込み</small></span></div>
+    <div><span class="n">4</span><span>理科準備室で鍵を見つける<small>机の上だけオレンジの明かり</small></span></div>
+    <div><span class="n">2</span><span>北廊下を進む<small>奥の蛍光灯がちらついている</small></span></div>
+    <div class="peak"><span class="n">5</span><span>曲がり角に戻ると……人影が迫る！<small>さっきは何も起きなかった場所</small></span></div>
+    <div><span class="n">3</span><span>曲がり角で保健室の赤い光が見える<small>でも扉には鍵がかかっている</small></span></div>
+    <div><span class="n">6</span><span>鍵で保健室の扉を開けてゴール<small>赤い光はゴールの目印</small></span></div>
+  </div>
+</section>
+
+<!-- ===================== 裏：どう作るか ===================== -->
+<section class="page">
+  <h2 style="margin-top:0">120分の進め方</h2>
+  <div class="bar">
+    <div style="flex:10;background:#5b666c">読む<small>0–10</small></div>
+    <div style="flex:15;background:#3f5a4f">紙に描く<small>10–25</small></div>
+    <div style="flex:45;background:#1f3b3a">箱を置いて部屋を作る<small>25–70</small></div>
+    <div style="flex:20;background:#7a5a35">歩いて直す<small>70–90</small></div>
+    <div style="flex:20;background:#9b2226">光・ギミック<small>90–110</small></div>
+    <div style="flex:10;background:#16201f">提出<small>110–</small></div>
+  </div>
+  <p class="small" style="margin-top:1mm">作る順番：床 → 外の壁 → 部屋の仕切り → 扉の穴 → 通れない場所 → 机など大きな物。<b>壁を数枚立てたら▶再生して歩いてみる。</b></p>
+
+  <div class="two">
+    <div>
+      <h2>覚えておく大きさ</h2>
+      <table>
+        <tr><th>プレイヤーの身長</th><td>1.75m</td></tr>
+        <tr><th>天井の高さ</th><td>3m</td></tr>
+        <tr><th>廊下の幅</th><td>2.5m（広すぎると怖くない）</td></tr>
+        <tr><th>扉</th><td>幅1.2m × 高さ2.2m</td></tr>
+        <tr><th>壁の厚さ</th><td>0.2m</td></tr>
+      </table>
+    </div>
+    <div>
+      <h2>ルール</h2>
+      <ul style="font-size:9.4pt">
+        <li>使うのは <b>Cube・Plane・ProBuilder の箱</b>だけ</li>
+        <li>色はグレー（色分けは3色まで）</li>
+        <li>床と壁には <b>Collider</b>（落ちない・すり抜けない）</li>
+        <li>始めに <b>HorrorKit → セットアップ → プレイヤー一式を配置</b></li>
+      </ul>
+      <div class="rule" style="margin-top:2mm"><b>赤い光はゴール（保健室）だけ。</b>ほかで使うと行き先がわからなくなる。</div>
+    </div>
+  </div>
+
+  <h2>課題のレベル</h2>
+  <div class="levels">
+    <div class="lv lv1"><h3>ブロンズ（必須）</h3>5つの部屋を作り、スタートからゴールまで歩ける</div>
+    <div class="lv lv2"><h3>シルバー（目標）</h3>光で道案内する（白・オレンジ・赤）。HorrorKit のドアを置く</div>
+    <div class="lv lv3"><h3>ゴールド（挑戦）</h3>HorrorKit で①〜⑥を動かす（鍵・施錠扉・ジャンプスケア）</div>
+  </div>
+
+  <div class="two">
+    <div>
+      <h2>提出するもの</h2>
+      <ul style="font-size:9.4pt">
+        <li>シーン：<code>Area_学籍番号_氏名.unity</code></li>
+        <li>スクリーンショット3枚<br><span class="small">①教室のスタート　②北廊下の奥　③保健室の扉</span></li>
+        <li>ひとこと：一番工夫したところ</li>
+      </ul>
+      <h2>見られるところ</h2>
+      <ul style="font-size:9.4pt">
+        <li>部屋と①〜⑥の場所が平面図どおりか</li>
+        <li>プレイヤーに対して大きさが自然か</li>
+        <li>光や塞いだ道で、迷わず進めるか</li>
+        <li>アートの雰囲気が出ているか</li>
+      </ul>
+    </div>
+    <div>
+      <h2>提出前チェック</h2>
+      <ul class="check">
+        <li>歩いてゴールまで行ける</li>
+        <li>落ちる場所・すり抜ける壁がない</li>
+        <li>廊下が広すぎない（2.5m前後）</li>
+        <li>通れない場所が、見てわかる</li>
+        <li>赤い光はゴールだけ</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>参考アート</h2>
+  <div class="arts">
+    <figure><img src="images/start_classroom.png" alt=""><figcaption><span class="n">1</span>教室：倒れた机、前の扉だけ開いている</figcaption></figure>
+    <figure><img src="images/prep_room.png" alt=""><figcaption><span class="n">4</span>理科準備室：狭い、机の上だけ明るい</figcaption></figure>
+    <figure><img src="images/corner_scare.png" alt=""><figcaption><span class="n">5</span>曲がり角：階段は机で塞がれている</figcaption></figure>
+    <figure><img src="images/infirmary_door.png" alt=""><figcaption><span class="n">6</span>保健室：扉の上に赤い光</figcaption></figure>
+  </div>
+
+  <div class="foot">平面図の下書きは別紙の方眼に。詳しい解説はコンセプトシート（詳細版）を見てください。</div>
+</section>
+
+</body>
+</html>

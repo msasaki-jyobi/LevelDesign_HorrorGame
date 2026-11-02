@@ -20,6 +20,13 @@ namespace HorrorKit.EditorTools
             serializedObject.Update();
             var ev = (HorrorEvent)target;
 
+            var oldBg = GUI.backgroundColor;
+            GUI.backgroundColor = new Color(0.55f, 0.75f, 1f);
+            if (GUILayout.Button("▶ イベントエディタで開く（Ctrl+Shift+E）", GUILayout.Height(30)))
+                EventEditorWindow.Open(ev, Mathf.Clamp(selectedPage, 0, Mathf.Max(0, pagesProp.arraySize - 1)));
+            GUI.backgroundColor = oldBg;
+            EditorGUILayout.Space(4);
+
             EditorGUILayout.PropertyField(nameProp, new GUIContent("イベント名"));
 
             if (Application.isPlaying)
@@ -40,9 +47,9 @@ namespace HorrorKit.EditorTools
             selectedPage = Mathf.Clamp(selectedPage, 0, pagesProp.arraySize - 1);
 
             EditorGUILayout.Space(4);
-            var labels = new string[pagesProp.arraySize];
-            for (int i = 0; i < labels.Length; i++) labels[i] = $"ページ {i + 1}";
-            selectedPage = GUILayout.Toolbar(selectedPage, labels);
+            selectedPage = PageTabBar.Draw(ev.pages, selectedPage, Application.isPlaying ? ev.ActivePageIndex : -1,
+                (from, to) => pagesProp.MoveArrayElement(from, to), 22f);
+            EditorGUILayout.LabelField("タブをドラッグで並び替え／「条」＝出現条件あり（マウスを乗せると条件を表示）", EditorStyles.centeredGreyMiniLabel);
 
             using (new EditorGUILayout.HorizontalScope())
             {
@@ -88,12 +95,43 @@ namespace HorrorKit.EditorTools
                 EditorGUILayout.Space(4);
                 EditorGUILayout.PropertyField(page.FindPropertyRelative("conditions"), new GUIContent("出現条件（すべて満たすと有効）"), true);
                 EditorGUILayout.Space(2);
-                EditorGUILayout.PropertyField(page.FindPropertyRelative("commands"), new GUIContent("実行内容"), true);
+                DrawCommandSummary(ev, selectedPage);
             }
 
             EditorGUILayout.HelpBox("番号の大きいページから順に条件を判定し、最初に条件を満たしたページが有効になります。\n「一度だけ実行」したページは以後スキップされ、下のページに移ります。", MessageType.None);
 
             serializedObject.ApplyModifiedProperties();
+        }
+
+        static GUIStyle lineStyle;
+
+        /// <summary>実行内容を RPGツクール風の1行表示で並べ、イベントエディタを開くボタンを出す。</summary>
+        static void DrawCommandSummary(HorrorEvent ev, int pageIndex)
+        {
+            EditorGUILayout.LabelField("実行内容", EditorStyles.boldLabel);
+            var cmds = ev.pages[pageIndex].commands;
+            var indents = HorrorKitEditorUtil.Indents(cmds);
+            lineStyle ??= new GUIStyle(EditorStyles.label) { fontSize = 11, clipping = TextClipping.Clip };
+
+            using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
+            {
+                if (cmds.Count == 0) EditorGUILayout.LabelField("（まだコマンドがありません）", EditorStyles.miniLabel);
+                for (int i = 0; i < cmds.Count; i++)
+                {
+                    var r = GUILayoutUtility.GetRect(10, 17, GUILayout.ExpandWidth(true));
+                    r.xMin += indents[i] * 14;
+                    var style = new GUIStyle(lineStyle);
+                    style.normal.textColor = HorrorKitEditorUtil.CommandColor(cmds[i].type);
+                    GUI.Label(r, HorrorKitEditorUtil.CommandLine(cmds, i), style);
+                    if (Event.current.type == EventType.MouseDown && Event.current.clickCount == 2 && r.Contains(Event.current.mousePosition))
+                    {
+                        EventEditorWindow.Open(ev, pageIndex, i);
+                        Event.current.Use();
+                    }
+                }
+            }
+            if (GUILayout.Button("イベントエディタで編集する（Ctrl+Shift+E）", GUILayout.Height(28)))
+                EventEditorWindow.Open(ev, pageIndex);
         }
 
         void AddPage(int index)
