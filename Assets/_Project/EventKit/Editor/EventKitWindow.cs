@@ -448,7 +448,7 @@ namespace EventKit.EditorTools
                 so.ApplyModifiedProperties();
             }
 
-            var doors = EventKitEditorUtil.FindAll<Door>().Where(d => d.locked || !string.IsNullOrEmpty(d.keyItemId)).ToArray();
+            var doors = EventKitEditorUtil.FindAll<Door>().Where(d => d.locked || !string.IsNullOrEmpty(d.keyItemId) || !string.IsNullOrEmpty(d.requiredFlag)).ToArray();
             if (doors.Length > 0)
             {
                 EditorGUILayout.Space(10);
@@ -481,6 +481,7 @@ namespace EventKit.EditorTools
                 return;
             }
 
+            if (GUILayout.Button("デバッグ専用ウィンドウを開く（フラグの色表示・開始時の状態・変化の記録）")) EventDebugWindow.Open();
             scrollA = EditorGUILayout.BeginScrollView(scrollA);
 
             EditorGUILayout.LabelField("フラグ", EditorStyles.boldLabel);

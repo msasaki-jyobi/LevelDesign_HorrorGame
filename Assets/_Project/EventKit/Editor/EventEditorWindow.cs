@@ -48,6 +48,7 @@ namespace EventKit.EditorTools
 
         [Serializable] class CommandClip { public List<EventCommand> items = new List<EventCommand>(); }
         [Serializable] class PageClip { public EventPage page; }
+        [Serializable] class PagesClip { public List<EventPage> pages = new List<EventPage>(); }
 
         static GUIStyle rowStyle, hintStyle;
         static GUIStyle RowStyle => rowStyle ??= new GUIStyle(EditorStyles.label) { richText = false, fontSize = 12, padding = new RectOffset(4, 4, 2, 2) };
@@ -205,7 +206,7 @@ namespace EventKit.EditorTools
             if (newPage != page) { page = newPage; selected = -1; }
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (GUILayout.Button("＋ 新規ページ", EditorStyles.miniButtonLeft))
+                if (GUILayout.Button(new GUIContent("＋ 新規ページ", "右端に追加します。\n" + PageTabBar.RuleText), EditorStyles.miniButtonLeft))
                     Defer(() => { target.pages.Add(new EventPage()); page = target.pages.Count - 1; selected = -1; });
                 if (GUILayout.Button("ページをコピー", EditorStyles.miniButtonMid))
                     clipboardPage = EditorJsonUtility.ToJson(new PageClip { page = target.pages[page] });
@@ -219,6 +220,9 @@ namespace EventKit.EditorTools
                             page++;
                             selected = -1;
                         });
+                var tplContent = new GUIContent("テンプレート");
+                var tplRect = GUILayoutUtility.GetRect(tplContent, EditorStyles.miniButtonMid);
+                if (GUI.Button(tplRect, tplContent, EditorStyles.miniButtonMid)) ShowTemplateMenu();
                 using (new EditorGUI.DisabledScope(page == 0))
                     if (GUILayout.Button("◀ 前へ", EditorStyles.miniButtonMid))
                         Defer(() => { (target.pages[page - 1], target.pages[page]) = (target.pages[page], target.pages[page - 1]); page--; });
@@ -230,6 +234,112 @@ namespace EventKit.EditorTools
                         && EditorUtility.DisplayDialog("ページの削除", $"ページ {page + 1} を削除しますか？", "削除", "キャンセル"))
                         Defer(() => { target.pages.RemoveAt(page); page = Mathf.Max(0, page - 1); selected = -1; });
             }
+        }
+
+        // ───────── ページテンプレート ─────────
+
+        /// <summary>テンプレートの保存先（EventKit の外。例: Assets/_Project/EventTemplates）</summary>
+        static string TemplateFolder
+        {
+            get
+            {
+                string root = EventKitEditorUtil.KitRoot;
+                int slash = root.LastIndexOf('/');
+                return (slash > 0 ? root.Substring(0, slash) : "Assets") + "/EventTemplates";
+            }
+        }
+
+        void ShowTemplateMenu()
+        {
+            var menu = new GenericMenu();
+            menu.AddItem(new GUIContent($"このページ（ページ {page + 1}）をテンプレートに保存…"), false, () => SaveTemplate(new List<EventPage> { target.pages[page] }));
+            menu.AddItem(new GUIContent($"全ページ（{target.pages.Count}ページ）をテンプレートに保存…"), false, () => SaveTemplate(target.pages));
+            menu.AddSeparator("");
+
+            var templates = new List<EventPageTemplate>();
+            foreach (var guid in AssetDatabase.FindAssets("t:EventPageTemplate"))
+            {
+                var t = AssetDatabase.LoadAssetAtPath<EventPageTemplate>(AssetDatabase.GUIDToAssetPath(guid));
+                if (t != null && t.pages.Count > 0) templates.Add(t);
+            }
+            templates.Sort((a, b) => string.CompareOrdinal(a.DisplayName, b.DisplayName));
+            if (templates.Count == 0) menu.AddDisabledItem(new GUIContent("テンプレートから追加（まだありません）"));
+            foreach (var t in templates)
+            {
+                var tpl = t;
+                string suffix = tpl.pages.Count > 1 ? $"（{tpl.pages.Count}ページ）" : "";
+                menu.AddItem(new GUIContent("テンプレートから追加/" + tpl.DisplayName + suffix), false, () => InsertTemplate(tpl));
+            }
+            menu.AddSeparator("");
+            menu.AddItem(new GUIContent("テンプレートの場所を表示"), false, () =>
+            {
+                EventKitEditorUtil.EnsureFolder(TemplateFolder);
+                EditorGUIUtility.PingObject(AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(TemplateFolder));
+            });
+            menu.ShowAsContext();
+        }
+
+        void SaveTemplate(List<EventPage> pages)
+        {
+            EventKitEditorUtil.EnsureFolder(TemplateFolder);
+            string defaultName = (pages.Count == 1 && !string.IsNullOrEmpty(pages[0].memo) ? pages[0].memo : target.DisplayName);
+            string path = EditorUtility.SaveFilePanelInProject("ページをテンプレートに保存", defaultName, "asset",
+                "テンプレートの名前を付けて保存します。シーン上のオブジェクトへの参照（ドア・対象など）は保存されないので、追加したあとに設定し直してください。",
+                TemplateFolder);
+            if (string.IsNullOrEmpty(path)) return;
+
+            so.ApplyModifiedProperties();
+            var tpl = CreateInstance<EventPageTemplate>();
+            tpl.templateName = System.IO.Path.GetFileNameWithoutExtension(path);
+            tpl.pages = ClonePages(pages);
+            // シーンのオブジェクトはアセットに保存できないので外しておく
+            foreach (var p in tpl.pages)
+                foreach (var c in p.commands)
+                    if (c != null) ClearSceneRefs(c);
+
+            var existing = AssetDatabase.LoadAssetAtPath<EventPageTemplate>(path);
+            if (existing != null)
+            {
+                Undo.RecordObject(existing, "テンプレートの上書き");
+                existing.pages = tpl.pages;
+                EditorUtility.SetDirty(existing);
+                DestroyImmediate(tpl);
+                tpl = existing;
+            }
+            else AssetDatabase.CreateAsset(tpl, path);
+            AssetDatabase.SaveAssets();
+            ShowNotification(new GUIContent("テンプレートに保存しました：" + tpl.DisplayName));
+        }
+
+        void InsertTemplate(EventPageTemplate tpl)
+        {
+            var pages = ClonePages(tpl.pages);
+            Defer(() =>
+            {
+                target.pages.InsertRange(page + 1, pages);
+                page++;
+                selected = -1;
+            });
+            Repaint();
+        }
+
+        static List<EventPage> ClonePages(List<EventPage> pages)
+        {
+            var clip = new PagesClip();
+            EditorJsonUtility.FromJsonOverwrite(EditorJsonUtility.ToJson(new PagesClip { pages = pages }), clip);
+            return clip.pages;
+        }
+
+        static void ClearSceneRefs(EventCommand c)
+        {
+            bool IsScene(UnityEngine.Object o) => o != null && !EditorUtility.IsPersistent(o);
+            if (IsScene(c.door)) c.door = null;
+            if (IsScene(c.jumpScare)) c.jumpScare = null;
+            if (IsScene(c.target)) c.target = null;
+            if (IsScene(c.callEvent)) c.callEvent = null;
+            if (c.unityEvent != null)
+                for (int i = 0; i < c.unityEvent.GetPersistentEventCount(); i++)
+                    if (IsScene(c.unityEvent.GetPersistentTarget(i))) { c.unityEvent = new UnityEngine.Events.UnityEvent(); break; }
         }
 
         void DrawLeft()
@@ -776,8 +886,8 @@ namespace EventKit.EditorTools
                 {
                     ("効果音", CommandType.PlaySound),
                     ("演出オブジェクトを再生", CommandType.JumpScare),
-                    ("フェードアウト", CommandType.FadeOut),
-                    ("フェードイン", CommandType.FadeIn),
+                    ("フェードアウト（暗くなる）", CommandType.FadeOut),
+                    ("フェードイン（明るくなる）", CommandType.FadeIn),
                 }),
                 ("シーン・移動", new[]
                 {

@@ -15,6 +15,9 @@ namespace EventKit
         /// <summary>フラグ・所持品などが変化したときに呼ばれる。</summary>
         public static event Action Changed;
         public static event Action<string> ItemAdded;
+        public static event Action<string> ItemRemoved;
+        /// <summary>フラグが変わったとき（id, 新しい値）</summary>
+        public static event Action<string, bool> FlagChanged;
 
         public static IReadOnlyList<string> Inventory { get { EnsureInit(); return inventory; } }
         public static IReadOnlyDictionary<string, bool> Flags { get { EnsureInit(); return flags; } }
@@ -27,6 +30,8 @@ namespace EventKit
             finishedPages.Clear();
             Changed = null;
             ItemAdded = null;
+            ItemRemoved = null;
+            FlagChanged = null;
             initialized = false;
         }
 
@@ -52,6 +57,7 @@ namespace EventKit
             EnsureInit();
             if (flags.TryGetValue(id, out var current) && current == value) return;
             flags[id] = value;
+            FlagChanged?.Invoke(id, value);
             Changed?.Invoke();
         }
 
@@ -74,7 +80,9 @@ namespace EventKit
         public static void RemoveItem(string id)
         {
             EnsureInit();
-            if (inventory.Remove(id)) Changed?.Invoke();
+            if (!inventory.Remove(id)) return;
+            ItemRemoved?.Invoke(id);
+            Changed?.Invoke();
         }
 
         public static bool IsPageFinished(string key) => finishedPages.Contains(key);
@@ -82,6 +90,12 @@ namespace EventKit
         public static void MarkPageFinished(string key)
         {
             if (finishedPages.Add(key)) Changed?.Invoke();
+        }
+
+        /// <summary>実行済みの印を外す（デバッグ用：1回だけのページをもう一度動かす）</summary>
+        public static void UnmarkPageFinished(string key)
+        {
+            if (finishedPages.Remove(key)) Changed?.Invoke();
         }
 
         public static void ResetAll()

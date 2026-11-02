@@ -44,13 +44,23 @@ namespace EventKit.EditorTools
             return s;
         }
 
+        /// <summary>ページの有効判定の決まり（ツールチップに出す）</summary>
+        public const string RuleText =
+            "【有効になるページ】番号の大きいページ（右）から順に条件を調べ、\n最初に条件を満たしたページが1つだけ有効になります。\n" +
+            "→ 条件の厳しいページほど右に置きます（条件なしは左端）。";
+
         static string Tooltip(EventPage p)
         {
             if (p == null) return "";
-            if (p.conditions.Count == 0) return "出現条件なし（常に有効）\nドラッグで並び替え";
-            var lines = new List<string>();
-            foreach (var c in p.conditions) lines.Add("・" + EventKitEditorUtil.ConditionText(c));
-            return "出現条件：\n" + string.Join("\n", lines) + "\nドラッグで並び替え";
+            string head;
+            if (p.conditions.Count == 0) head = "出現条件なし（条件の上では常に満たす）";
+            else
+            {
+                var lines = new List<string>();
+                foreach (var c in p.conditions) lines.Add("・" + EventKitEditorUtil.ConditionText(c));
+                head = "出現条件：\n" + string.Join("\n", lines);
+            }
+            return head + "\n\n" + RuleText + "\nドラッグで並び替え";
         }
 
         /// <summary>タブ列を描いて、選択中のページ番号を返す。並び替えたときは onMove(元, 先) を呼ぶ。</summary>

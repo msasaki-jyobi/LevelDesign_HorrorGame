@@ -33,8 +33,8 @@ namespace EventKit
         [InspectorName("演出/効果音")] PlaySound = 9,
         [InspectorName("演出/視点を向ける（振り返る）")] LookAt = 16,
         [InspectorName("演出/懐中電灯を明滅（追加パック）")] FlickerFlashlight = 10,
-        [InspectorName("演出/フェードアウト")] FadeOut = 11,
-        [InspectorName("演出/フェードイン")] FadeIn = 12,
+        [InspectorName("演出/フェードアウト（画面が暗くなる）")] FadeOut = 11,
+        [InspectorName("演出/フェードイン（画面が明るくなる）")] FadeIn = 12,
         [InspectorName("制御/待機")] Wait = 13,
         [InspectorName("制御/オブジェクト表示切替（ON/OFF指定）")] SetActive = 14,
         [InspectorName("制御/イベント終了")] EndEvent = 15,
@@ -203,7 +203,7 @@ namespace EventKit
         public string sceneGuid;
         [Tooltip("シーン遷移：到着する出現地点の名前（空ならシーンの初期位置）")]
         public string spawnId;
-        [Tooltip("シーン遷移：フェードインの秒数（フェードアウトは duration）")]
+        [Tooltip("シーン遷移：フェードイン（画面が明るくなる）の秒数（フェードアウト＝暗くなる は duration）")]
         [Min(0f)] public float fadeInDuration = 1f;
         [Tooltip("ロード画面付きシーン遷移：読み込み中に表示する UI プレハブ")]
         public GameObject loadingPrefab;

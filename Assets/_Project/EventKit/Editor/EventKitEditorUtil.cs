@@ -274,8 +274,8 @@ namespace EventKit.EditorTools
                 case CommandType.PlaySound: return $"◆効果音：{Name(c.clip)}" + (c.target != null ? $"（{c.target.name}から）" : "") + (c.boolValue ? "・終わるまで待つ" : "");
                 case CommandType.LookAt: return $"◆視点を向ける：{Name(c.target)}（{c.duration:0.##}秒）";
                 case CommandType.FlickerFlashlight: return $"◆懐中電灯の明滅：{c.duration:0.##}秒";
-                case CommandType.FadeOut: return $"◆フェードアウト：{c.duration:0.##}秒";
-                case CommandType.FadeIn: return $"◆フェードイン：{c.duration:0.##}秒";
+                case CommandType.FadeOut: return $"◆フェードアウト：{c.duration:0.##}秒（画面が暗くなる）";
+                case CommandType.FadeIn: return $"◆フェードイン：{c.duration:0.##}秒（画面が明るくなる）";
                 case CommandType.Wait: return $"◆ウェイト：{c.duration:0.##}秒";
                 case CommandType.SetActive: return $"◆表示切替：{Name(c.target)} を{(c.boolValue ? "表示" : "非表示")}";
                 case CommandType.EndEvent: return "◆イベント処理の中断";

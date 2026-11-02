@@ -338,9 +338,9 @@ namespace EventKit.EditorTools
                 r.y += Line + Space;
             }
 
-            EditorGUI.PropertyField(r, property.FindPropertyRelative("duration"), new GUIContent("フェードアウト秒"));
+            EditorGUI.PropertyField(r, property.FindPropertyRelative("duration"), new GUIContent("フェードアウト秒", "画面が暗くなるまでの秒数"));
             r.y += Line + Space;
-            EditorGUI.PropertyField(r, property.FindPropertyRelative("fadeInDuration"), new GUIContent("フェードイン秒"));
+            EditorGUI.PropertyField(r, property.FindPropertyRelative("fadeInDuration"), new GUIContent("フェードイン秒", "画面が明るくなるまでの秒数"));
             if (loading)
             {
                 r.y += Line + Space;
@@ -483,7 +483,9 @@ namespace EventKit.EditorTools
                 case CommandType.FadeIn:
                 case CommandType.FadeOut:
                 case CommandType.Wait:
-                    EditorGUI.PropertyField(r, property.FindPropertyRelative("duration"), new GUIContent("秒数"));
+                    string tip = type == CommandType.FadeOut ? "画面が暗くなるまでの秒数（フェードアウト＝暗転）"
+                        : type == CommandType.FadeIn ? "画面が明るくなるまでの秒数（フェードイン＝暗転から戻る）" : "";
+                    EditorGUI.PropertyField(r, property.FindPropertyRelative("duration"), new GUIContent("秒数", tip));
                     break;
 
                 case CommandType.SetActive:
@@ -596,9 +598,9 @@ namespace EventKit.EditorTools
                     if (fadeProp.boolValue)
                     {
                         r.y += Line + Space;
-                        EditorGUI.PropertyField(r, property.FindPropertyRelative("duration"), new GUIContent("フェードアウト秒"));
+                        EditorGUI.PropertyField(r, property.FindPropertyRelative("duration"), new GUIContent("フェードアウト秒", "画面が暗くなるまでの秒数"));
                         r.y += Line + Space;
-                        EditorGUI.PropertyField(r, property.FindPropertyRelative("fadeInDuration"), new GUIContent("フェードイン秒"));
+                        EditorGUI.PropertyField(r, property.FindPropertyRelative("fadeInDuration"), new GUIContent("フェードイン秒", "画面が明るくなるまでの秒数"));
                     }
                     break;
                 }

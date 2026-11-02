@@ -47,7 +47,7 @@ namespace EventKit.EditorTools
             Slot(so, "choices", "選択肢", "選択肢の見本（ItemTemplate）を数だけ複製して並べる", UIPrefabTools.DefaultChoices);
             Slot(so, "prompt", "調べるプロンプト・照準", "「[E] 調べる」と画面中央の点", UIPrefabTools.DefaultPrompt);
             Slot(so, "inventory", "所持品ウィンドウ", "キーアイテムの一覧・説明・アイコン", UIPrefabTools.DefaultInventory);
-            Slot(so, "fade", "フェード", "フェードアウト・イン、シーン遷移の暗転", UIPrefabTools.DefaultFade);
+            Slot(so, "fade", "フェード", "フェードアウト（暗くなる）・フェードイン（明るくなる）、シーン遷移の暗転", UIPrefabTools.DefaultFade);
             Slot(so, "loading", "ロード画面", "ロード画面付きシーン遷移（コマンドでの指定が無いとき）", () => UIPrefabTools.DefaultPrefab().GetComponent<LoadingScreen>());
 
             EditorGUILayout.Space(8);

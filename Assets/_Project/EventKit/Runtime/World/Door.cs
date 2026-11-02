@@ -10,6 +10,8 @@ namespace EventKit
 
     /// <summary>
     /// 開き戸（ヒンジで回転）または引き戸（横にスライド）。施錠時は鍵アイテムを持っていれば解錠できる。
+    /// 解錠フラグを指定すると、そのフラグがONになった時点で自動で解錠される。
+    /// pageEvent を指定すると、閉じたドアを調べたときの動き（条件・会話・解錠）をイベントのページで管理できる。
     /// 開き戸はヒンジ位置のオブジェクトに付け、扉の板は子に置く。
     /// 引き戸は「動く部分」に指定したオブジェクトが Slide Offset だけ移動する。
     /// </summary>
@@ -33,8 +35,14 @@ namespace EventKit
         public bool consumeKey = true;
         [TextArea(1, 3)] public string lockedMessage = "鍵がかかっている。";
         [TextArea(1, 3)] public string unlockMessage = "「{0}」で鍵を開けた。";
+        [Tooltip("このフラグがONになると、鍵がなくても自動で解錠される（空欄なら使わない）")]
+        [FlagId] public string requiredFlag;
         [Tooltip("解錠時にONにするフラグ")]
         [FlagId] public string unlockFlag;
+
+        [Header("イベントページで管理")]
+        [Tooltip("閉じたドアを調べると、このイベントの有効なページを実行する（無ければ上の鍵の設定で動く）")]
+        public GameEvent pageEvent;
 
         [Header("操作")]
         [Tooltip("OFFにするとプレイヤーは直接操作できない（イベントからのみ開閉）")]
@@ -63,6 +71,9 @@ namespace EventKit
 
         void Update()
         {
+            // 解錠フラグがONになったら、その場で解錠する
+            if (locked && !string.IsNullOrEmpty(requiredFlag) && GameState.GetFlag(requiredFlag)) Unlock();
+
             float target = isOpen ? 1f : 0f;
             if (Mathf.Approximately(progress, target)) return;
             progress = Mathf.MoveTowards(progress, target, openSpeed * Time.deltaTime);
@@ -78,11 +89,28 @@ namespace EventKit
                 hinge.localRotation = closedRotation * Quaternion.Euler(0f, openAngle * k, 0f);
         }
 
-        public string InteractPrompt => isOpen ? "閉める" : locked ? "開ける（施錠）" : "開ける";
+        /// <summary>閉じているときに調べると、ページの有効なこのイベントを実行する（鍵・会話・条件をページで管理）。</summary>
+        bool UsesPages(out GameEvent ev)
+        {
+            ev = pageEvent;
+            if (isOpen || ev == null) return false;
+            var p = ev.ActivePage;
+            return p != null && p.trigger == EventTrigger.Interact && p.commands.Count > 0;
+        }
+
+        public string InteractPrompt =>
+            UsesPages(out var ev) ? ev.InteractPrompt
+            : isOpen ? "閉める" : locked ? "開ける（施錠）" : "開ける";
         public bool CanInteract => playerCanUse && !EventRunner.IsBusy;
 
         public void Interact(PlayerInteractor interactor)
         {
+            if (UsesPages(out var ev))
+            {
+                ev.Interact(interactor);
+                return;
+            }
+
             if (locked)
             {
                 if (!string.IsNullOrEmpty(keyItemId) && GameState.HasItem(keyItemId))
